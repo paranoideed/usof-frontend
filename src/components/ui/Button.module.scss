@@ -1,0 +1,21 @@
+@import "../../styles/_variables.scss";
+
+.button {
+  width: 100%;
+  background: $second-brand-color;
+  color: white;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+
+  &:hover {
+    filter: brightness(1.05);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: default;
+  }
+}

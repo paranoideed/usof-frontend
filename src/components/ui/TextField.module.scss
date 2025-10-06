@@ -1,0 +1,36 @@
+@import "../../styles/_variables.scss";
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px; // как в .formGroup на странице
+}
+
+.label {
+  font-size: 14px;
+  color: #ddd; // или $main-text-soft, если есть
+}
+
+.input {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: none;
+  background: darken($main-color, 5%);
+  color: $main-text-color;
+  font-size: 15px;
+
+  &:focus {
+    outline: 2px solid $second-main-color;
+  }
+}
+
+.inputInvalid {
+  outline: 2px solid #d9534f; // подчёркиваем ошибку
+}
+
+.error {
+  color: #ffb3b3;        // локальная ошибка под полем
+  font-size: 12px;
+  margin-top: 2px;
+}
