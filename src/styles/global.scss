@@ -1,0 +1,15 @@
+@import './_variables.scss';
+@import './_mixins.scss';
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: $bg-color;
+  color: #fff;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+body {
+  color: $main-text-color;
+}

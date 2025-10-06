@@ -1,0 +1,87 @@
+@import "../../styles/_variables.scss";
+
+.root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: $bg-color;
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  background: $main-color;
+  padding: 28px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.under_card {
+  margin-top: 12px;
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+  background: $main-color;
+  padding: 28px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+
+  a {
+    color: $second-brand-color;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.title {
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 22px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.label {
+  font-size: 14px;
+  color: #ddd;
+}
+
+.input {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: none;
+  background: darken($main-color, 5%);
+  color: white;
+  font-size: 15px;
+
+  &:focus {
+    outline: 2px solid $second-main-color;
+  }
+}
+
+.button {
+  width: 100%;
+  background: $second-brand-color;
+  color: white;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+
+  &:hover {
+    filter: brightness(1.05);
+  }
+}
