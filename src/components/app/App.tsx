@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "../../pages/login/LoginPage.tsx";
 import RegisterPage from "../../pages/register/RegisterPage.tsx";
+import OwnProfilePage from "../../pages/profile/ProfilePage.tsx";
 
 export default function App() {
     return (
@@ -12,6 +13,7 @@ export default function App() {
             {/*</nav>*/}
 
             <Routes>
+                <Route path="/profiles/me" element={<OwnProfilePage />} />
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />

@@ -1,4 +1,5 @@
-@import "../../styles/_variables.scss";
+@use "../../styles/variables" as *;
+@use "sass:color"; // добавить вверху файла
 
 .group {
   display: flex;
@@ -16,7 +17,7 @@
   padding: 10px 12px;
   border-radius: 6px;
   border: none;
-  background: darken($main-color, 5%);
+  background: color.adjust($main-color, $lightness: -5%);
   color: $main-text-color;
   font-size: 15px;
 

@@ -22,7 +22,7 @@ function isEmail(value: string) {
 }
 
 export default function LoginPage() {
-    const [identifier, setIdentifier] = useState(""); // login OR email
+    const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
 
     const [loading, setLoading] = useState(false);
@@ -36,7 +36,6 @@ export default function LoginPage() {
         setError(null);
         setFieldErrors({});
 
-        // простая клиентская валидация
         const next: FieldErrors = {};
         if (!identifier.trim()) next.identifier = "This is required";
         if (!password.trim()) next.password = "This is required";
@@ -50,17 +49,16 @@ export default function LoginPage() {
 
         try {
             setLoading(true);
-            const data = await apiLogin({ identifier, password }); // ожидаем { token }
+            const data = await apiLogin({ identifier, password });
 
-            // сохранить токен в cookie
             Cookies.set("token", data.token, {
                 expires: 7,
                 sameSite: "lax",
                 secure: window.location.protocol === "https:",
             });
 
-            // редирект после успеха
-            navigate("/");
+            navigate("/profiles/me");
+
         } catch (err: any) {
             const status = err?.response?.status;
             const data = err?.response?.data;
