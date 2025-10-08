@@ -10,7 +10,7 @@ export type MeResponse = {
     updatedAt:  Date | null;
 };
 
-export async function fetchMe(): Promise<MeResponse> {
+export async function getMeProfile(): Promise<MeResponse> {
     try {
         const { data } = await api.get("/profiles/me");
         return data;

@@ -1,6 +1,11 @@
 @use "../../styles/variables" as *;
 @use "sass:color";
 
+:root {
+  --nav-h: clamp(56px, 10vh, 88px);
+  --nav-font: clamp(12px, 22vh, 20px);
+}
+
 .root {
   position: fixed;
   top: 0;
@@ -8,8 +13,7 @@
   right: 0;
 
   width: 100%;
-  height: 10vh;
-  min-height: 56px;
+  height: var(--nav-h); /* было: 10vh + min-height */
   background: #1f1f25cc;
   backdrop-filter: blur(6px);
   border-bottom: 1px solid rgba(255,255,255,.08);
@@ -36,7 +40,7 @@
 }
 
 .brandLink {
-  color: $main-text-color;
+  color: $text-primary;
   text-decoration: none;
 }
 
@@ -58,15 +62,15 @@
   border-radius: 10px;
 
   font-size: var(--nav-font);
-  color: $second-text-color;
+  color: $second-primary-text;
   text-decoration: none;
 
   transition: background .15s ease, color .15s ease, transform .06s ease;
 }
 
 .link:hover {
-  background: $second-main-color;
-  color: $main-text-color;
+  background: $second-main;
+  color: $text-primary;
 }
 
 .link:active {
@@ -74,7 +78,12 @@
 }
 
 .active {
-  background: $brand-color;
-  color: $main-text-color !important;
-  box-shadow: 0 0 0 1px color.adjust($brand-color, $lightness: -5%) inset;
+  background: $brand;
+  color: $text-primary !important;
+  box-shadow: 0 0 0 1px color.adjust($brand, $lightness: -5%) inset;
+
+    &:hover {
+        background: $brand-hover;
+        box-shadow: 0 0 0 1px color.adjust($brand-hover, $lightness: -5%) inset;
+    }
 }

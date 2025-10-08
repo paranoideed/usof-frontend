@@ -1,0 +1,37 @@
+@use "../../styles/variables" as *;
+@use "sass:color";
+
+.profile {
+  display: grid;
+  grid-template-columns: var(--avatar) 1fr;
+  gap: var(--space);
+  align-items: center;
+}
+
+@media (max-width: 600px) {
+  .profile {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+}
+
+.info > div {
+  margin: 6px 0;
+}
+
+.actions {
+  margin-top: calc(var(--space) * 1.25);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: var(--space);
+}
+
+.avatar {
+  width: var(--avatar);
+  height: var(--avatar);
+  border-radius: calc(var(--radius) - 4px);
+  object-fit: cover;
+  background: #f3f3f3;
+}

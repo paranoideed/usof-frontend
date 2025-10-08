@@ -2,7 +2,7 @@
 
 .button {
   width: 100%;
-  background: $second-brand-color;
+  background: $second-color;
   color: white;
   border: none;
   padding: 10px 12px;
@@ -12,6 +12,7 @@
 
   &:hover {
     filter: brightness(1.05);
+    background: $second-brand-hover;
   }
 
   &:disabled {

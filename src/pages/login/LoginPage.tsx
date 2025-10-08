@@ -3,14 +3,13 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Cookies from "js-cookie";
 
+import Button from "@/components/ui/Button";
+import TextField from "@/components/ui/TextField";
+import { FormError } from "@/components/ui/FormAlert";
+
+import { login as apiLogin } from "@/features/auth/login";
+
 import s from "./LoginPage.module.scss";
-
-// ⚠️ если у тебя папка названа "feautures", поправь путь ниже
-import { login as apiLogin } from "../../features/auth/login";
-
-import TextField from "../../components/ui/TextField";
-import Button from "../../components/ui/Button";
-import { FormError } from "../../components/ui/FormAlert";
 
 type FieldErrors = {
     identifier?: string;

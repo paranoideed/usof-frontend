@@ -3,13 +3,19 @@
 
 html, body, #root { height: 100%; }
 
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
 body {
   margin: 0;
-  background: $bg-color;
+  background: $bg;
   color: #fff;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
 }
 
 body {
-  color: $main-text-color;
+  color: $text-primary;
 }

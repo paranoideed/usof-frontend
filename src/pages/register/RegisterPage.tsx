@@ -2,23 +2,23 @@ import * as React from "react";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
+import Button from "@/components/ui/Button";
+import TextField from "@/components/ui/TextField";
+import { FormError, FormOk } from "@/components/ui/FormAlert";
+
+import { register as apiRegister } from "@/features/auth/register";
+
 import s from "./RegisterPage.module.scss";
 
-import { register as apiRegister } from "../../features/auth/register";
-
-import TextField from "../../components/ui/TextField";
-import Button from "../../components/ui/Button";
-import { FormError, FormOk } from "../../components/ui/FormAlert";
-
 type FieldErrors = {
-    login?: string;
+    username?: string;
     email?: string;
     password?: string;
     passwordConfirm?: string;
 };
 
 export default function RegisterPage() {
-    const [login, setLogin] = useState("");
+    const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -38,7 +38,7 @@ export default function RegisterPage() {
 
         const newFieldErrors: FieldErrors = {};
 
-        if (!login.trim()) newFieldErrors.login = "This is required";
+        if (!username.trim()) newFieldErrors.username = "This is required";
         if (!email.trim()) newFieldErrors.email = "This is required";
         if (!password.trim()) newFieldErrors.password = "This is required";
         if (!confirmPassword.trim()) newFieldErrors.passwordConfirm = "This is required";
@@ -55,7 +55,7 @@ export default function RegisterPage() {
 
         try {
             setLoading(true);
-            await apiRegister({ login, email, password, passwordConfirm: confirmPassword });
+            await apiRegister({ username, email, password, passwordConfirm: confirmPassword });
             setOk("Registration successful! You can now log in.");
 
             setTimeout(() => {
@@ -72,7 +72,7 @@ export default function RegisterPage() {
                 const first = (arr: unknown) =>
                     Array.isArray(arr) && arr.length ? String(arr[0]) : undefined;
 
-                if (props.login?.errors) next.login = first(props.login.errors);
+                if (props.login?.errors) next.username = first(props.login.errors);
                 if (props.email?.errors) next.email = first(props.email.errors);
                 if (props.password?.errors) next.password = first(props.password.errors);
                 if (props.passwordConfirm?.errors) next.passwordConfirm = first(props.passwordConfirm.errors);
@@ -105,11 +105,11 @@ export default function RegisterPage() {
 
                 <form onSubmit={onSubmit} noValidate>
                     <TextField
-                        label="Login"
-                        value={login}
-                        onChange={(e) => setLogin(e.currentTarget.value)}
-                        placeholder="mylogin"
-                        error={fieldErrors.login}
+                        label="Username"
+                        value={username}
+                        onChange={(e) => setUsername(e.currentTarget.value)}
+                        placeholder="username"
+                        error={fieldErrors.username}
                         required
                     />
 

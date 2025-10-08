@@ -17,12 +17,12 @@
   padding: 10px 12px;
   border-radius: 6px;
   border: none;
-  background: color.adjust($main-color, $lightness: -5%);
-  color: $main-text-color;
+  background: color.adjust($main, $lightness: -5%);
+  color: $text-primary;
   font-size: 15px;
 
   &:focus {
-    outline: 2px solid $second-main-color;
+    outline: 2px solid $second-main;
   }
 }
 

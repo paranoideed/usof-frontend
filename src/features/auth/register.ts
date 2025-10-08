@@ -1,7 +1,7 @@
 import {api} from "../client.ts";
 
 export type RegisterInput = {
-    login: string;
+    username: string;
     email: string;
     password: string;
     passwordConfirm: string;
@@ -10,7 +10,7 @@ export type RegisterInput = {
 export async function register(input: RegisterInput) {
     const payload = {
         email: input.email,
-        username: input.login,
+        username: input.username,
         password: input.password,
     };
 
