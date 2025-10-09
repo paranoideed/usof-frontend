@@ -37,6 +37,7 @@
   border: 1px solid rgba(0,0,0,.08);
   border-radius: var(--radius);
   padding: calc(var(--space) * 1.5);
+
   box-shadow: 0 4px 18px rgba(0,0,0,.06);
 
   container-type: inline-size;
@@ -49,19 +50,27 @@
 
 .nothingFound {
   text-align: center;
-  color: $second-primary-text;
+  color: $brand;
   font-size: 18px;
-  padding: calc(var(--space) * 0.5) 0;
+  padding-top: calc(var(--space) * 2);
 }
 
 .searchProfileInput {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid rgba(0,0,0,.1);
-    border-radius: calc(var(--radius) - 4px);
-    background: $input-bg;
-    color: $second-primary-text;
-    font-size: 15px;
-    transition: border-color 140ms ease, box-shadow 140ms ease;
-    outline-offset: 2px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: rgba(255, 255, 255, 0.1);
+
+  color: #fff;
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  &:focus {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 2px $brand-hover
+  }
 }

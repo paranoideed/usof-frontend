@@ -1,0 +1,80 @@
+@use "../../styles/variables" as *;
+
+.page {
+  min-height: calc(100vh - 60px);
+  display: grid;
+  place-items: start center;
+  padding: 48px 16px 24px;
+}
+
+.card {
+  width: 100%;
+  max-width: 720px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+  text-align: center;
+}
+
+.code {
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+  color: $brand;
+  text-shadow: 0 0 16px rgba(74,144,226,0.25);
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.text {
+  margin: 0 0 18px;
+  color: #bdbdbd;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.primary,
+.ghost {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .06s ease, background-color .2s ease, border-color .2s ease;
+}
+
+.primary {
+  background: $brand;
+  border-color: $brand-hover;
+  color: #fff;
+  &:hover { background-color: $brand-hover; }
+  &:active { transform: translateY(1px); }
+}
+
+.ghost {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  color: inherit;
+  border-color: rgba(255,255,255,0.18);
+  text-decoration: none;
+  &:hover { background-color: rgba(255,255,255,0.06); }
+  &:active { transform: translateY(1px); }
+}
+
+@media (max-width: 480px) {
+  .card { padding: 20px; }
+  .code { font-size: 44px; }
+  .title { font-size: 22px; }
+}
