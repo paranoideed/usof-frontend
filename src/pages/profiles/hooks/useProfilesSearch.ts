@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { searchProfiles, type SearchProfilesResponse } from "../../../features/profiles/searchProfiles.ts";
+import { searchProfiles, type SearchProfilesResponse } from "@/features/profiles/searchProfiles.ts";
 
 function useDebounced<T>(value: T, delay = 350): T {
     const [v, setV] = useState(value);

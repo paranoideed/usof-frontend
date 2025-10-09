@@ -1,0 +1,76 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Разделяем контент и кнопки по вертикали */
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.02);
+  height: 100%; /* Если карточки в сетке — чтобы они выравнивались */
+}
+
+.content {
+  flex: 1; /* Занимает всё оставшееся пространство между шапкой и кнопками */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.desc {
+  margin: 0;
+  color: #bdbdbd;
+  line-height: 1.35;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.edit, .delete {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.edit, .delete {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  color: #fff;
+  transition: background-color 0.2s ease 0s;
+}
+
+.edit {
+  background: #4a90e2;
+  border-color: #1f476e;
+
+  &:hover {
+    background-color: #204161;
+  }
+}
+
+.delete {
+  background: #e24a4a;
+  border-color: #751717;
+
+  &:hover {
+    background-color: #602020;
+  }
+}

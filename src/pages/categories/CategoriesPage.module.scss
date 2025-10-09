@@ -1,0 +1,59 @@
+@use "../../styles/variables" as *;
+
+.container {
+  padding: 16px;
+}
+
+.wrap {
+  padding-top: calc(var(--nav-h) + 16px);
+  display: flex;
+  flex-direction: column;
+  padding-left: 10%;
+  padding-right: 10%;
+  gap: 16px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.createBtn {
+  margin: 16px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background-color: $brand;
+  color: white;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    background-color: $brand-hover;
+  }
+}
+
+.error {
+  color: #e57373;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.moreBtn {
+  margin: 16px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background-color: $second-color;
+  color: white;
+  border: none;
+  cursor: pointer;
+
+    &:hover {
+        background-color: $second-brand-hover;
+    }
+}
