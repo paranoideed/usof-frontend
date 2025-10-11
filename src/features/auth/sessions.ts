@@ -41,6 +41,11 @@ export function getCurrentUserRole(): UserRole | null {
     return payload?.role ?? payload?.Role ?? null;
 }
 
+export function getCurrentUserId(): string | null {
+    const token = getAccessToken();
+    const payload = parseJwtPayload<{ sub?: string; Sub?: string }>(token);
+    return payload?.sub ?? payload?.Sub ?? null;
+}
 
 export function isAdmin(): boolean {
     console.log("Current user role:", getCurrentUserRole());

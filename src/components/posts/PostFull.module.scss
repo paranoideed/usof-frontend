@@ -1,0 +1,98 @@
+@use "../../styles/variables" as *;
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #666;
+  flex-shrink: 0;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.username {
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+}
+
+.username a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.username a:hover {
+  text-decoration: underline;
+}
+
+.username a:visited,
+.username a:active,
+.username a:focus {
+  color: inherit;
+}
+
+.date {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.postCard {
+  background: #1b1b1b;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.category {
+  background: #333;
+  border-radius: 8px;
+  padding: 0.2rem 0.6rem;
+  margin-right: 0.3rem;
+}
+
+.content {
+  margin-top: 1rem;
+  line-height: 1.6;
+}
+
+.likes {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+}
+
+.actions {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.counts {
+  margin-left: 8px;
+  font-size: 14px;
+  opacity: .85;
+}
+

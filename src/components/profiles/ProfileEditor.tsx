@@ -4,6 +4,7 @@ import Button from "../ui/Button.tsx";
 import TextField from "../ui/TextField.tsx";
 
 import s from "./ProfileEditor.module.scss";
+import DEFAULT_PIC from "@features/ui.ts";
 
 type Props = {
     avatar?: string | null;
@@ -33,7 +34,7 @@ export default function ProfileEditor({
             <div className={s.profile}>
                 <img
                     className={s.avatar}
-                    src={avatar || "https://media.tenor.com/lKS-KXz-g80AAAAM/killua-hot-dog.gif"}
+                    src={avatar || DEFAULT_PIC}
                     alt="avatar"
                 />
                 <div className={s.info}>

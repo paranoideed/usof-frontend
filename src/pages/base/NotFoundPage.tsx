@@ -4,11 +4,6 @@ import s from "./NotFoundPage.module.scss";
 export default function NotFoundPage() {
     const navigate = useNavigate();
 
-    // React.useEffect(() => {
-    //   const t = setTimeout(() => navigate("/"), 5000);
-    //   return () => clearTimeout(t);
-    // }, [navigate]);
-
     return (
         <div className={s.page}>
             <div className={s.card}>

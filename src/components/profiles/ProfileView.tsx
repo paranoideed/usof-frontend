@@ -1,14 +1,15 @@
 import * as React from "react";
 
 import s from "./ProfileView.module.scss";
+import DEFAULT_PIC from "@features/ui.ts";
 
 type Props = {
-    avatar?: string | null;
-    username: string;
+    avatar?:    string | null;
+    username:   string;
     pseudonym?: string | null;
-    reputation?: number | null;
-    createdAt?: Date | null;
-    actions?: React.ReactNode; // кнопки (Edit/Logout) или что-то ещё
+    reputation: number;
+    created_at: string | Date;
+    actions?:   React.ReactNode;
 };
 
 export default function ProfileView({
@@ -16,7 +17,7 @@ export default function ProfileView({
     username,
     pseudonym,
     reputation,
-    createdAt,
+    created_at,
     actions,
 }: Props) {
     return (
@@ -24,17 +25,17 @@ export default function ProfileView({
             <div className={s.profile}>
                 <img
                     className={s.avatar}
-                    src={avatar || "https://media.tenor.com/lKS-KXz-g80AAAAM/killua-hot-dog.gif"}
+                    src={avatar || DEFAULT_PIC}
                     alt="avatar"
                 />
                 <div className={s.info}>
                     <div className={s.username}>{username}</div>
                     {pseudonym ? <div className={s.pseudonym}>{pseudonym}</div> : null}
-                    {typeof reputation === "number" ? (
-                        <div><b>Reputation:</b> {reputation}</div>
-                    ) : null}
-                    {createdAt ? (
-                        <div><b>Part since:</b> {new Date(createdAt).toDateString().slice(3)}</div>
+                    <div><b>Reputation:</b> {reputation}</div>
+                    {created_at ? (
+                        <div><b>Part since:</b>{
+                            new Date(created_at).toDateString().slice(3)
+                        }</div>
                     ) : null}
                 </div>
             </div>

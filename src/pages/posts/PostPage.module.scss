@@ -1,0 +1,15 @@
+@use "../../styles/variables" as *;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  color: #fff;
+}
+
+.container {
+  margin-top: calc(var(--nav-h) + 16px);
+  max-width: 800px;
+  width: 100%;
+}

@@ -109,7 +109,7 @@ export default function MyProfilePage() {
                         username={(data as any).username ?? (data as any).login}
                         pseudonym={(data as any).pseudonym}
                         reputation={"reputation" in (data as any) ? (data as any).reputation : null}
-                        createdAt={data.createdAt}
+                        created_at={data.created_at}
                         actions={
                             <>
                                 <Button onClick={startEdit}>Edit</Button>

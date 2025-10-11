@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 import s from "./ProfileMini.module.scss";
+import DEFAULT_PIC from "@features/ui.ts";
 
 type Props = {
     id: string;
@@ -16,7 +17,7 @@ export default function ProfileMini({ id, username, pseudonym, avatar, to }: Pro
         <Link to={href} className={s.item}>
             <img
                 className={s.avatar}
-                src={avatar || "https://media.tenor.com/lKS-KXz-g80AAAAM/killua-hot-dog.gif"}
+                src={avatar || DEFAULT_PIC}
                 alt="avatar"
             />
             <div className={s.meta}>

@@ -1,0 +1,29 @@
+@use "../../styles/variables" as *;
+
+.fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: $second-color;
+  color: white;
+  font-size: 28px;
+  line-height: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 8px 24px $second-brand-hover;
+  transition: 0.3s;
+
+  &:hover {
+    filter: brightness(1.05);
+    background: $second-brand-hover;
+  }
+}
+
+.fab:active {
+  transform: translateY(1px);
+}

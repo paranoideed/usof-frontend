@@ -10,7 +10,7 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 export default defineConfig([
     globalIgnores(['dist']),
     {
-        files: ['**/*.{ts,tsx,js,jsx}'],
+        files: ['**/*.{ts,PostFull.tsx,js,jsx}'],
         plugins: {
             import: pluginImport,
         },

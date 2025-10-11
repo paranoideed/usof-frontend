@@ -6,8 +6,8 @@ export type MeResponse = {
     pseudonym:  string | null;
     avatar:     string | null;
     reputation: number;
-    createdAt:  Date;
-    updatedAt:  Date | null;
+    created_at:  Date;
+    updated_at:  Date | null;
 };
 
 export async function getMeProfile(): Promise<MeResponse> {

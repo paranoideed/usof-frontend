@@ -6,7 +6,9 @@ import UserProfilePage from "@pages/profiles/UserProfile.tsx";
 import SearchProfilesPage from "@pages/profiles/SearchProfilesPage.tsx";
 import CategoryFormPage from "@pages/categories/CategoryFormPage.tsx";
 import CategoriesPage from "@pages/categories/CategoriesPage.tsx";
-import NotFoundPage from "@pages/NotFound/NotFoundPage.tsx";
+import NotFoundPage from "@pages/base/NotFoundPage.tsx";
+import PostsFeedPage from "@pages/posts/PostsFeedPage.tsx";
+import PostPage from "@pages/posts/PostPage.tsx";
 
 export default function App() {
     return (
@@ -25,6 +27,9 @@ export default function App() {
                 <Route path="/categories" element={<CategoriesPage />} />
                 <Route path="/categories/create" element={<CategoryFormPage />} />
                 <Route path="/categories/:id/edit" element={<CategoryFormPage />} />
+
+                <Route path="/posts" element={<PostsFeedPage />} />
+                <Route path="/posts/:id" element={<PostPage />} />
 
                 <Route path="*" element={<NotFoundPage />} />
             </Routes>

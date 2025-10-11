@@ -31,8 +31,8 @@ export default function UserProfilePage() {
                         avatar={data.avatar}
                         username={data.username}
                         pseudonym={data.pseudonym ?? undefined}
-                        reputation={typeof data.reputation === "number" ? data.reputation : null}
-                        createdAt={data.createdAt}
+                        reputation={data.reputation}
+                        created_at={data.created_at}
                     />
                 )}
             </div>

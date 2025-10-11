@@ -1,4 +1,4 @@
-// CategoryFormPage.tsx
+// CategoryFormPage.PostFull.tsx
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createCategory, updateCategory, listCategories } from "@/features/categories/categories.ts";

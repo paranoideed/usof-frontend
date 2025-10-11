@@ -13,6 +13,7 @@ export default function NavBar() {
                 </div>
 
                 <ul className={s.menu}>
+                    <li><NavLink to="/posts" className={linkCls} end>Posts</NavLink></li>
                     <li><NavLink to="/categories" className={linkCls} end>Categories</NavLink></li>
                     <li><NavLink to="/profiles" className={linkCls} end>Profiles</NavLink></li>
                     <li><NavLink to="/profiles/me" className={linkCls}>Me</NavLink></li>

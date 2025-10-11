@@ -2,23 +2,23 @@
 import { api } from "../client";
 
 export type CategoryRow = {
-    id: string;
-    title: string;
+    id:          string;
+    title:       string;
     description: string;
-    created_at: string;
-    updated_at: string | null;
+    created_at:  string;
+    updated_at:  string | null;
 };
 
 export type ListCategoriesRequest = {
     offset?: number;
-    limit?: number;
+    limit?:  number;
 };
 
 export type ListCategoriesResponse = {
-    data: CategoryRow[];
-    limit: number | null;
+    data:   CategoryRow[];
+    limit:  number | null;
     offset: number | null;
-    total: number | null;
+    total:  number | null;
 };
 
 export async function listCategories(request: ListCategoriesRequest): Promise<ListCategoriesResponse>  {
@@ -37,8 +37,8 @@ export async function createCategory(input: { title: string; description: string
 }
 
 export type UpdateCategoryInput = {
-    id: string;
-    title: string | null;
+    id:          string;
+    title:       string | null;
     description: string | null
 };
 
