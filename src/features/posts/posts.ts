@@ -27,6 +27,7 @@ export type Post = {
     data:          PostData;
     categories:    Category[];
     user_reaction: string | null;
+    can_delete?: boolean; // <—
 }
 
 export type LikeType = "like" | "dislike";
@@ -39,7 +40,6 @@ export function parseMyReaction(s?: string | null): MyReaction {
 export async function getMyReaction(postId: string): Promise<MyReaction> {
     try {
         const { data } = await api.get(`/posts/${postId}`);
-        console.log("getMyReaction ", data.user_reaction);
         return parseMyReaction(data.user_reaction);
     } catch {
         try {
@@ -54,6 +54,7 @@ export async function getMyReaction(postId: string): Promise<MyReaction> {
 // ---------- Posts ----------
 export async function getPost(id: string): Promise<Post> {
     const { data } = await api.get<Post>(`/posts/${id}`);
+    console.log("post categories ", data.categories);
     return data;
 }
 
@@ -116,7 +117,6 @@ export async function likePost(postId: string, type: LikeType) {
 
 export async function unlikePost(postId: string) {
     const { data } = await api.delete(`/posts/${postId}/like`);
-    console.log("unlikePost", data);
     return data;
 }
 
@@ -131,4 +131,8 @@ export type ListCategoriesResponse = {
 export async function listCategories(limit = 100, offset = 0): Promise<Category[]> {
     const { data } = await api.get<ListCategoriesResponse>("/categories", { params: { limit, offset } });
     return data.data;
+}
+
+export async function deletePost(postId: string): Promise<void> {
+    await api.delete(`/posts/${postId}`);
 }

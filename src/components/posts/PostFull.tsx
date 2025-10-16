@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import * as React from "react";
 
 import {
@@ -8,7 +8,8 @@ import {
     unlikePost,
     getPost,
     parseMyReaction,
-    getMyReaction
+    getMyReaction,
+    deletePost,
 } from "@/features/posts/posts";
 import DEFAULT_PIC from "@features/ui.ts";
 
@@ -16,14 +17,20 @@ import s from "@components/posts/PostFull.module.scss";
 import LikeButton from "@components/ui/LikeButton.tsx";
 import DislikeButton from "@components/ui/DislikeButton.tsx";
 import RatingPost from "@components/ui/RatingPost.tsx";
+import {getCurrentUserId, getCurrentUserRole} from "@features/auth/sessions.ts";
 
 export default function PostFull(props: Post) {
     const postId = String(props.data.id);
+    const navigate = useNavigate();
 
     const [likes, setLikes] = React.useState<number>(props.data.likes ?? 0);
     const [dislikes, setDislikes] = React.useState<number>(props.data.dislikes ?? 0);
     const [myReaction, setMyReaction] = React.useState<MyReaction>(parseMyReaction(props.user_reaction));
     const [busy, setBusy] = React.useState(false);
+
+    const meId = getCurrentUserId();
+    const meRole = getCurrentUserRole();
+    const canDelete = meRole === "admin" || (meId && meId === props.data.author_id);
 
     React.useEffect(() => {
         let alive = true;
@@ -49,36 +56,45 @@ export default function PostFull(props: Post) {
     }
 
     async function onLike() {
-        console.log("onLike", { busy, myReaction });
         if (busy) return;
         setBusy(true);
         try {
             if (myReaction === "like") {
-                await unlikePost(postId);   // ← передаём тип
+                await unlikePost(postId);
             } else {
                 await likePost(postId, "like");
             }
             await refreshFromServer();
-        } catch (e) {
-            console.error(e);
         } finally {
             setBusy(false);
         }
     }
 
     async function onDislike() {
-        console.log("onDislike", { busy, myReaction });
         if (busy) return;
         setBusy(true);
         try {
             if (myReaction === "dislike") {
-                await unlikePost(postId); // ← передаём тип
+                await unlikePost(postId);
             } else {
                 await likePost(postId, "dislike");
             }
             await refreshFromServer();
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    async function onDelete() {
+        if (!canDelete || busy) return;
+        if (!confirm("Удалить пост?")) return;
+        setBusy(true);
+        try {
+            await deletePost(postId);
+            navigate("/posts"); // или куда тебе нужно после удаления
         } catch (e) {
             console.error(e);
+            alert("Не удалось удалить пост");
         } finally {
             setBusy(false);
         }
@@ -100,15 +116,40 @@ export default function PostFull(props: Post) {
                             </Link>
                         </div>
                     </div>
+
                     <h1 className={s.title}>{props.data.title}</h1>
+
+                    {props.categories?.length ? (
+                        <div className={s.categories}>
+                            {props.categories.map((c) => (
+                                <Link
+                                    key={c.id}
+                                    to={`/categories/${c.id}`}
+                                    className={s.category}
+                                    title={c.description || c.title}
+                                    onClick={(e) => e.stopPropagation()}
+                                    onKeyDown={(e) => e.stopPropagation()}
+                                >
+                                    #{c.title}
+                                </Link>
+                            ))}
+                        </div>
+                    ) : null}
 
                     <div className={s.date}>
                         <span>Published: {new Date(props.data.created_at).toDateString()}</span>
                     </div>
                 </div>
-                <RatingPost count={(likes - dislikes) || 0} />
-            </div>
 
+                <div className={s.headerButtonsContainer}>
+                    <RatingPost count={(likes - dislikes) || 0} />
+                    {canDelete && (
+                        <button className={s.deleteBtn} onClick={onDelete} disabled={busy} title="Удалить пост">
+                            Delete
+                        </button>
+                    )}
+                </div>
+            </div>
 
             <p className={s.content}>{props.data.content}</p>
 
@@ -129,7 +170,7 @@ export default function PostFull(props: Post) {
                 />
             </div>
 
-            <hr />
+            <hr/>
         </div>
     );
 }

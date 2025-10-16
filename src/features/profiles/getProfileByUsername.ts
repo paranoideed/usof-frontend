@@ -9,6 +9,6 @@ export default async function getProfileByUsername(username: string): Promise<pr
         pseudonym: data.pseudonym ?? data.data?.attributes?.pseudonym ?? null,
         avatar: data.avatar ?? data.data?.attributes?.avatar ?? null,
         reputation: data.reputation ?? data.data?.attributes?.reputation ?? 0,
-        createdAt: data.createdAt ?? data.created_at ?? data.data?.attributes?.createdAt,
+        created_at: data.createdAt ?? data.created_at ?? data.data?.attributes?.createdAt,
     };
 }
