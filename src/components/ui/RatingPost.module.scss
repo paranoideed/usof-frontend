@@ -1,0 +1,42 @@
+@use "../../styles/variables" as *;
+
+.rating {
+  min-width: 44px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: none;
+  background: $rating;
+  color: #000000;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px $rating-shover;
+  transition: 0.2s;
+
+  &:disabled {
+    opacity: .7;
+    cursor: default;
+  }
+}
+
+.active {
+  outline: 2px solid rgba(255,255,255,.6);
+  box-shadow: 0 0 0 3px rgba(0,0,0,.08), 0 6px 18px $rating-shover;
+}
+
+.icon {
+  line-height: 1;
+  font-size: 16px;
+}
+
+.count {
+  line-height: 1;
+  font-weight: 600;
+}
+
+.label {
+  opacity: .9;
+}

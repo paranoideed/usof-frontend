@@ -7,12 +7,12 @@ type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 export default function DislikeButton({
-                                          className = "",
-                                          active = false,
-                                          count = 0,
-                                          children,
-                                          ...rest
-                                      }: Props) {
+        className = "",
+        active = false,
+        count = 0,
+        children,
+        ...rest
+    }: Props) {
     return (
         <button
             className={[s.dislike, active ? s.active : "", className].join(" ")}
