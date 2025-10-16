@@ -12,6 +12,8 @@ export default function PostPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        if (!id) return;
+        setLoading(true);
         api.get(`/posts/${id}`)
             .then(res => setPost(res.data))
             .catch(err => setError(err.message))
@@ -19,7 +21,7 @@ export default function PostPage() {
     }, [id]);
 
     if (loading) return <div className={s.loading}>Loading...</div>;
-    if (error) return <div className={s.error}>{error}</div>;
+    if (error) return <div className={s.error}>Error: {error}</div>;
     if (!post) return <div className={s.empty}>Post not found</div>;
 
     return (
