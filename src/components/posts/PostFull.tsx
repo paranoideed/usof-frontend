@@ -15,6 +15,7 @@ import DEFAULT_PIC from "@features/ui.ts";
 import s from "@components/posts/PostFull.module.scss";
 import LikeButton from "@components/ui/LikeButton.tsx";
 import DislikeButton from "@components/ui/DislikeButton.tsx";
+import RatingPost from "@components/ui/RatingPost.tsx";
 
 export default function PostFull(props: Post) {
     const postId = String(props.data.id);
@@ -86,29 +87,28 @@ export default function PostFull(props: Post) {
     return (
         <div className={s.postCard}>
             <div className={s.header}>
-                <img className={s.avatar} src={DEFAULT_PIC} alt="avatar" />
-                <div className={s.meta}>
-                    <div className={s.username}>
-                        <Link
-                            to={`/profiles/u/${props.data.author_username}`}
-                            onClick={(e) => e.stopPropagation()}
-                            onKeyDown={(e) => e.stopPropagation()}
-                        >
-                            {props.data.author_username ?? `@${props.data.author_username}`}
-                        </Link>
+                <div className={s.postInfo}>
+                    <div className={s.meta}>
+                        <img className={s.avatar} src={DEFAULT_PIC} alt="avatar" />
+                        <div className={s.username}>
+                            <Link
+                                to={`/profiles/u/${props.data.author_username}`}
+                                onClick={(e) => e.stopPropagation()}
+                                onKeyDown={(e) => e.stopPropagation()}
+                            >
+                                @{props.data.author_username ?? `@${props.data.author_username}`}
+                            </Link>
+                        </div>
                     </div>
+                    <h1 className={s.title}>{props.data.title}</h1>
+
                     <div className={s.date}>
-                        {new Date(props.data.created_at).toLocaleDateString()}
+                        <span>Published: {new Date(props.data.created_at).toDateString()}</span>
                     </div>
                 </div>
+                <RatingPost count={(likes - dislikes) || 0} />
             </div>
 
-            <h1 className={s.title}>{props.data.title}</h1>
-
-            <div className={s.meta}>
-                <span>by {props.data.author_username}</span>
-                <span>{new Date(props.data.created_at).toLocaleDateString()}</span>
-            </div>
 
             <p className={s.content}>{props.data.content}</p>
 
