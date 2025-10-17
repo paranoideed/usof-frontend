@@ -1,75 +1,64 @@
-import {Link, useNavigate} from "react-router-dom";
 import * as React from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 import {
     type Post,
     type MyReaction,
+    parseMyReaction,
     likePost,
     unlikePost,
     getPost,
-    parseMyReaction,
-    getMyReaction,
     deletePost,
     updatePostStatus,
 } from "@/features/posts/posts";
+
+import { getCurrentUserId, getCurrentUserRole } from "@features/auth/sessions.ts";
 import DEFAULT_PIC from "@features/ui.ts";
 
 import s from "@components/posts/PostFull.module.scss";
 import LikeButton from "@components/ui/LikeButton.tsx";
 import DislikeButton from "@components/ui/DislikeButton.tsx";
 import RatingPost from "@components/ui/RatingPost.tsx";
-import {getCurrentUserId, getCurrentUserRole} from "@features/auth/sessions.ts";
 import Button from "@components/ui/Button.tsx";
-import MarkdownView from "../ui/MarkdownView";
+import MarkdownView from "@components/ui/MarkdownView";
 import EditPostModal from "@pages/posts/EditPostModal.tsx";
 
 export default function PostFull(props: Post) {
     const navigate = useNavigate();
-    const [busy, setBusy] = React.useState(false);
-
-    const [myReaction, setMyReaction] = React.useState<MyReaction>(parseMyReaction(props.user_reaction));
 
     const [post, setPost] = React.useState(props.data);
     const [cats, setCats] = React.useState(props.categories ?? []);
+    const [myReaction, setMyReaction] = React.useState<MyReaction>(parseMyReaction(props.user_reaction));
+    const [busy, setBusy] = React.useState(false);
+    const [editOpen, setEditOpen] = React.useState(false);
+
+    React.useEffect(() => {
+        setPost(props.data);
+        setCats(props.categories ?? []);
+        setMyReaction(parseMyReaction(props.user_reaction));
+    }, [props.data, props.categories, props.user_reaction]);
 
     const meId = getCurrentUserId();
     const meRole = getCurrentUserRole();
-
     const canDelete = meRole === "admin" || (meId && meId === post.author_id);
     const canManage = meRole === "admin" || (meId && meId === post.author_id);
-    const canEdit   = Boolean(meId && meId === post.author_id);
-
-    const [editOpen, setEditOpen] = React.useState(false);
-
-    console.log("PostFull render ", {canDelete, canManage});
+    const canEdit = Boolean(meId && meId === post.author_id);
 
     const isClosed = post.status === "closed";
     const nextStatus = isClosed ? "active" : "closed";
 
-    React.useEffect(() => {
-        let alive = true;
-        (async () => {
-            try {
-                const r = await getMyReaction(post.id);
-                if (alive) setPost(p => ({...p, user_reaction: r}));
-            } catch {}
-        })();
-        return () => { alive = false; };
-    }, [post.id]);
-
     async function refreshFromServer() {
         const fresh = await getPost(post.id);
         setPost(fresh.data);
-        setCats(fresh.categories);
-        setMyReaction(parseMyReaction(fresh.user_reaction)); // ✅ добавь
+        setCats(fresh.categories ?? []);
+        setMyReaction(parseMyReaction(fresh.user_reaction));
     }
 
     async function onLike() {
         if (busy) return;
         setBusy(true);
         const prev = myReaction;
-        // оптимистично
-        setMyReaction(prev === "like" ? null : "like");
+        setMyReaction(prev === "like" ? null : "like"); // оптимистично
         try {
             if (prev === "like") await unlikePost(post.id);
             else await likePost(post.id, "like");
@@ -93,16 +82,14 @@ export default function PostFull(props: Post) {
         }
     }
 
-
     async function onDelete() {
         if (!canDelete || busy) return;
         if (!confirm("Удалить пост?")) return;
         setBusy(true);
         try {
             await deletePost(post.id);
-            navigate("/posts"); // или куда тебе нужно после удаления
-        } catch (e) {
-            console.error(e);
+            navigate("/posts");
+        } catch {
             alert("Не удалось удалить пост");
         } finally {
             setBusy(false);
@@ -112,15 +99,12 @@ export default function PostFull(props: Post) {
     async function onToggleStatus() {
         if (!canManage || busy) return;
         setBusy(true);
-
         const prev = post.status;
-        setPost((p) => ({...p, status: nextStatus}));
-
+        setPost((p) => ({ ...p, status: nextStatus })); // оптимистичный апдейт
         try {
             await updatePostStatus(post.id, nextStatus);
-        } catch (e) {
-            console.error(e);
-            setPost((p) => ({...p, status: prev}));
+        } catch {
+            setPost((p) => ({ ...p, status: prev })); // откат
             alert("Не удалось изменить статус");
         } finally {
             setBusy(false);
@@ -149,7 +133,14 @@ export default function PostFull(props: Post) {
                     {cats?.length ? (
                         <div className={s.categories}>
                             {cats.map((c) => (
-                                <Link key={c.id} to={`/categories/${c.id}`} className={s.category} title={c.description || c.title}>
+                                <Link
+                                    key={c.id}
+                                    to={`/categories/${c.id}`}
+                                    className={s.category}
+                                    title={c.description || c.title}
+                                    onClick={(e) => e.stopPropagation()}
+                                    onKeyDown={(e) => e.stopPropagation()}
+                                >
                                     #{c.title}
                                 </Link>
                             ))}
@@ -187,16 +178,15 @@ export default function PostFull(props: Post) {
                         aria-pressed={myReaction === "dislike"}
                     />
                 </div>
+
                 <div className={s.BottomGroupBtn}>
                     {canEdit && (
-                        <Button onClick={() => setEditOpen(true)} title="Редактировать пост">Edit</Button>
+                        <Button onClick={() => setEditOpen(true)} title="Редактировать пост">
+                            Edit
+                        </Button>
                     )}
                     {canManage && (
-                        <Button
-                            onClick={onToggleStatus}
-                            disabled={busy}
-                            title={isClosed ? "Reopen post" : "Close post"}
-                        >
+                        <Button onClick={onToggleStatus} disabled={busy} title={isClosed ? "Reopen post" : "Close post"}>
                             {isClosed ? "Reopen" : "Close"}
                         </Button>
                     )}
@@ -223,10 +213,9 @@ export default function PostFull(props: Post) {
                     initialContent={post.content}
                     initialCategories={cats ?? []}
                 />
-
             )}
 
-            <hr/>
+            <hr />
         </div>
     );
 }

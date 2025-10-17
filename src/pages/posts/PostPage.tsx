@@ -1,28 +1,47 @@
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import * as React from "react";
+import {useNavigate, useParams} from "react-router-dom";
 import NavBar from "@/components/ui/NavBar";
 import { api } from "@/features/client";
 import s from "./PostPage.module.scss";
-import PostFull from "@components/posts/PostFull.tsx";
+import PostFull from "@components/posts/PostFull";
+import type { Post } from "@/features/posts/posts";
 
 export default function PostPage() {
-    const { id } = useParams<{ id: string }>();
-    const [post, setPost] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
-    useEffect(() => {
+    const { id } = useParams<{ id: string }>();
+    const [post, setPost] = React.useState<Post | null>(null);
+    const [loading, setLoading] = React.useState(true);
+    const [error, setError] = React.useState<string | null>(null);
+
+    // Простой, надёжный эффект загрузки
+    React.useEffect(() => {
         if (!id) return;
+        let ignore = false;            // защищаем setState при размонтировании
         setLoading(true);
-        api.get(`/posts/${id}`)
-            .then(res => setPost(res.data))
-            .catch(err => setError(err.message))
-            .finally(() => setLoading(false));
+
+        (async () => {
+            try {
+                const res = await api.get<Post>(`/posts/${id}`);
+                if (!ignore) setPost(res.data);
+            } catch (err: any) {
+                const status = err?.response?.status;
+                if (status === 404) {
+                    navigate("/404", { replace: true });
+                    return;
+                }
+                if (!ignore) setError(err?.message || "Failed to load post");
+            } finally {
+                if (!ignore) setLoading(false);
+            }
+        })();
+
+        return () => { ignore = true; };
     }, [id]);
 
     if (loading) return <div className={s.loading}>Loading...</div>;
-    if (error) return <div className={s.error}>Error: {error}</div>;
-    if (!post) return <div className={s.empty}>Post not found</div>;
+    if (error)   return <div className={s.error}>Error: {error}</div>;
+    if (!post)   return <div className={s.empty}>Post not found</div>;
 
     return (
         <div className={s.root}>
