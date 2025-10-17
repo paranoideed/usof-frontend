@@ -10,6 +10,7 @@ import {
     parseMyReaction,
     getMyReaction,
     deletePost,
+    updatePostStatus,
 } from "@/features/posts/posts";
 import DEFAULT_PIC from "@features/ui.ts";
 
@@ -18,52 +19,60 @@ import LikeButton from "@components/ui/LikeButton.tsx";
 import DislikeButton from "@components/ui/DislikeButton.tsx";
 import RatingPost from "@components/ui/RatingPost.tsx";
 import {getCurrentUserId, getCurrentUserRole} from "@features/auth/sessions.ts";
+import Button from "@components/ui/Button.tsx";
+import MarkdownView from "../ui/MarkdownView";
+import EditPostModal from "@pages/posts/EditPostModal.tsx";
 
 export default function PostFull(props: Post) {
-    const postId = String(props.data.id);
     const navigate = useNavigate();
-
-    const [likes, setLikes] = React.useState<number>(props.data.likes ?? 0);
-    const [dislikes, setDislikes] = React.useState<number>(props.data.dislikes ?? 0);
-    const [myReaction, setMyReaction] = React.useState<MyReaction>(parseMyReaction(props.user_reaction));
     const [busy, setBusy] = React.useState(false);
+
+    const [myReaction, setMyReaction] = React.useState<MyReaction>(parseMyReaction(props.user_reaction));
+
+    const [post, setPost] = React.useState(props.data);
+    const [cats, setCats] = React.useState(props.categories ?? []);
 
     const meId = getCurrentUserId();
     const meRole = getCurrentUserRole();
-    const canDelete = meRole === "admin" || (meId && meId === props.data.author_id);
+
+    const canDelete = meRole === "admin" || (meId && meId === post.author_id);
+    const canManage = meRole === "admin" || (meId && meId === post.author_id);
+    const canEdit   = Boolean(meId && meId === post.author_id);
+
+    const [editOpen, setEditOpen] = React.useState(false);
+
+    console.log("PostFull render ", {canDelete, canManage});
+
+    const isClosed = post.status === "closed";
+    const nextStatus = isClosed ? "active" : "closed";
 
     React.useEffect(() => {
         let alive = true;
         (async () => {
             try {
-                const r = await getMyReaction(postId);
-                if (alive) setMyReaction(r);
+                const r = await getMyReaction(post.id);
+                if (alive) setPost(p => ({...p, user_reaction: r}));
             } catch {}
         })();
         return () => { alive = false; };
-    }, [postId]);
-
-    React.useEffect(() => {
-        setLikes(props.data.likes ?? 0);
-        setDislikes(props.data.dislikes ?? 0);
-    }, [props.data.likes, props.data.dislikes]);
+    }, [post.id]);
 
     async function refreshFromServer() {
-        const fresh = await getPost(postId);
-        setLikes(fresh.data.likes ?? 0);
-        setDislikes(fresh.data.dislikes ?? 0);
-        setMyReaction(parseMyReaction(fresh.user_reaction));
+        const fresh = await getPost(post.id);
+        setPost(fresh.data);
+        setCats(fresh.categories);
+        setMyReaction(parseMyReaction(fresh.user_reaction)); // ✅ добавь
     }
 
     async function onLike() {
         if (busy) return;
         setBusy(true);
+        const prev = myReaction;
+        // оптимистично
+        setMyReaction(prev === "like" ? null : "like");
         try {
-            if (myReaction === "like") {
-                await unlikePost(postId);
-            } else {
-                await likePost(postId, "like");
-            }
+            if (prev === "like") await unlikePost(post.id);
+            else await likePost(post.id, "like");
             await refreshFromServer();
         } finally {
             setBusy(false);
@@ -73,28 +82,46 @@ export default function PostFull(props: Post) {
     async function onDislike() {
         if (busy) return;
         setBusy(true);
+        const prev = myReaction;
+        setMyReaction(prev === "dislike" ? null : "dislike");
         try {
-            if (myReaction === "dislike") {
-                await unlikePost(postId);
-            } else {
-                await likePost(postId, "dislike");
-            }
+            if (prev === "dislike") await unlikePost(post.id);
+            else await likePost(post.id, "dislike");
             await refreshFromServer();
         } finally {
             setBusy(false);
         }
     }
 
+
     async function onDelete() {
         if (!canDelete || busy) return;
         if (!confirm("Удалить пост?")) return;
         setBusy(true);
         try {
-            await deletePost(postId);
+            await deletePost(post.id);
             navigate("/posts"); // или куда тебе нужно после удаления
         } catch (e) {
             console.error(e);
             alert("Не удалось удалить пост");
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    async function onToggleStatus() {
+        if (!canManage || busy) return;
+        setBusy(true);
+
+        const prev = post.status;
+        setPost((p) => ({...p, status: nextStatus}));
+
+        try {
+            await updatePostStatus(post.id, nextStatus);
+        } catch (e) {
+            console.error(e);
+            setPost((p) => ({...p, status: prev}));
+            alert("Не удалось изменить статус");
         } finally {
             setBusy(false);
         }
@@ -108,28 +135,21 @@ export default function PostFull(props: Post) {
                         <img className={s.avatar} src={DEFAULT_PIC} alt="avatar" />
                         <div className={s.username}>
                             <Link
-                                to={`/profiles/u/${props.data.author_username}`}
+                                to={`/profiles/u/${post.author_username}`}
                                 onClick={(e) => e.stopPropagation()}
                                 onKeyDown={(e) => e.stopPropagation()}
                             >
-                                @{props.data.author_username ?? `@${props.data.author_username}`}
+                                @{post.author_username ?? `@${post.author_username}`}
                             </Link>
                         </div>
                     </div>
 
-                    <h1 className={s.title}>{props.data.title}</h1>
+                    <h1 className={s.title}>{post.title}</h1>
 
-                    {props.categories?.length ? (
+                    {cats?.length ? (
                         <div className={s.categories}>
-                            {props.categories.map((c) => (
-                                <Link
-                                    key={c.id}
-                                    to={`/categories/${c.id}`}
-                                    className={s.category}
-                                    title={c.description || c.title}
-                                    onClick={(e) => e.stopPropagation()}
-                                    onKeyDown={(e) => e.stopPropagation()}
-                                >
+                            {cats.map((c) => (
+                                <Link key={c.id} to={`/categories/${c.id}`} className={s.category} title={c.description || c.title}>
                                     #{c.title}
                                 </Link>
                             ))}
@@ -137,38 +157,74 @@ export default function PostFull(props: Post) {
                     ) : null}
 
                     <div className={s.date}>
-                        <span>Published: {new Date(props.data.created_at).toDateString()}</span>
+                        <span>Published: {new Date(post.created_at).toDateString()}</span>
                     </div>
                 </div>
 
                 <div className={s.headerButtonsContainer}>
-                    <RatingPost count={(likes - dislikes) || 0} />
+                    <RatingPost count={(post.likes - post.dislikes) || 0} />
+                </div>
+            </div>
+
+            <div className={s.content}>
+                <MarkdownView>{post.content}</MarkdownView>
+            </div>
+
+            <div className={s.actions}>
+                <div className={s.BottomGroupBtn}>
+                    <LikeButton
+                        active={myReaction === "like"}
+                        onClick={onLike}
+                        disabled={busy}
+                        count={post.likes}
+                        aria-pressed={myReaction === "like"}
+                    />
+                    <DislikeButton
+                        active={myReaction === "dislike"}
+                        onClick={onDislike}
+                        disabled={busy}
+                        count={post.dislikes}
+                        aria-pressed={myReaction === "dislike"}
+                    />
+                </div>
+                <div className={s.BottomGroupBtn}>
+                    {canEdit && (
+                        <Button onClick={() => setEditOpen(true)} title="Редактировать пост">Edit</Button>
+                    )}
+                    {canManage && (
+                        <Button
+                            onClick={onToggleStatus}
+                            disabled={busy}
+                            title={isClosed ? "Reopen post" : "Close post"}
+                        >
+                            {isClosed ? "Reopen" : "Close"}
+                        </Button>
+                    )}
                     {canDelete && (
-                        <button className={s.deleteBtn} onClick={onDelete} disabled={busy} title="Удалить пост">
+                        <Button onClick={onDelete} disabled={busy} title="Удалить пост">
                             Delete
-                        </button>
+                        </Button>
                     )}
                 </div>
             </div>
 
-            <p className={s.content}>{props.data.content}</p>
+            {canEdit && (
+                <EditPostModal
+                    open={editOpen}
+                    onClose={() => setEditOpen(false)}
+                    onUpdated={(updated) => {
+                        setPost(updated.data);
+                        setCats(updated.categories ?? []);
+                        setMyReaction(parseMyReaction(updated.user_reaction));
+                        setEditOpen(false);
+                    }}
+                    postId={post.id}
+                    initialTitle={post.title}
+                    initialContent={post.content}
+                    initialCategories={cats ?? []}
+                />
 
-            <div className={s.actions}>
-                <LikeButton
-                    active={myReaction === "like"}
-                    onClick={onLike}
-                    disabled={busy}
-                    count={likes}
-                    aria-pressed={myReaction === "like"}
-                />
-                <DislikeButton
-                    active={myReaction === "dislike"}
-                    onClick={onDislike}
-                    disabled={busy}
-                    count={dislikes}
-                    aria-pressed={myReaction === "dislike"}
-                />
-            </div>
+            )}
 
             <hr/>
         </div>

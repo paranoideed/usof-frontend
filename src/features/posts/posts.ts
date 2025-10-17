@@ -1,6 +1,6 @@
 import { api } from "@/features/client";
 
-export type PostStatus = "active" | "inactive" | "hidden";
+export type PostStatus = "active" | "closed";
 
 export type PostData = {
     id:              string;
@@ -135,4 +135,29 @@ export async function listCategories(limit = 100, offset = 0): Promise<Category[
 
 export async function deletePost(postId: string): Promise<void> {
     await api.delete(`/posts/${postId}`);
+}
+
+export async function updatePostStatus(postId: string, status: PostStatus): Promise<void> {
+    await api.patch(`/posts/${postId}/status`, { status });
+}
+
+// features/posts/posts.ts
+export type PostUpdateInput = {
+    id: string;
+    title: string;
+    content: string;
+    categories: string[];
+};
+
+export async function updatePost(body: PostUpdateInput): Promise<Post> {
+    const { id, ...rest } = body;
+
+    const payload = {
+        title: rest.title?.trim(),
+        content: rest.content?.trim(),
+        categories: Array.isArray(rest.categories) ? rest.categories.slice(0, 5) : [],
+    };
+
+    const res = await api.put<Post>(`/posts/${id}`, payload);
+    return res.data;
 }

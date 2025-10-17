@@ -1,22 +1,44 @@
 import * as React from "react";
-import s from "./CreatePostModal.module.scss";
+import s from "./CreatePostModal.module.scss"; // переиспользуем те же стили
 import type { CategoryRow } from "@/features/categories/categories";
-import { createPost, listCategories } from "@/features/posts/posts.ts";
-import { getCurrentUserId } from "@features/auth/sessions.ts";
+import {listCategories, updatePost, type Post} from "@/features/posts/posts.ts";
 import Button from "@components/ui/Button.tsx";
 import clsx from "clsx";
 
-type Props = { open: boolean; onClose: () => void; onCreated?: () => void };
+type Props = {
+    open: boolean;
+    onClose: () => void;
+    onUpdated?: (updated: Post) => void; // <-- изменили сигнатуру
+    postId: string;
+    initialTitle: string;
+    initialContent: string;
+    initialCategories: { id: string; title: string }[] | string[];
+};
+
 type FieldErrors = { common?: string; title?: string; content?: string; categories?: string };
 
-export default function CreatePostModal({ open, onClose, onCreated }: Props) {
-    const [title, setTitle] = React.useState("");
-    const [content, setContent] = React.useState("");
-    const [categories, setCategories] = React.useState<string[]>([]);
+export default function EditPostModal({
+        open,
+        onClose,
+        onUpdated,
+        postId,
+        initialTitle,
+        initialContent,
+        initialCategories,
+    }: Props) {
+    const [title, setTitle] = React.useState(initialTitle);
+    const [content, setContent] = React.useState(initialContent);
+    const [categories, setCategories] = React.useState<string[]>(
+        Array.isArray(initialCategories)
+            ? (typeof initialCategories[0] === "string"
+                ? (initialCategories as string[])
+                : (initialCategories as { id: string }[]).map((c) => c.id))
+            : []
+    );
     const [cats, setCats] = React.useState<CategoryRow[]>([]);
+    const [catsOpen, setCatsOpen] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
     const [errors, setErrors] = React.useState<FieldErrors>({});
-    const [catsOpen, setCatsOpen] = React.useState(false);
 
     React.useEffect(() => {
         if (!open) return;
@@ -29,6 +51,19 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
         })();
     }, [open]);
 
+    // синхронизируемся, если пост перезагрузили с сервера
+    React.useEffect(() => {
+        if (!open) return;
+        setTitle(initialTitle);
+        setContent(initialContent);
+        const arr = Array.isArray(initialCategories)
+            ? (typeof initialCategories[0] === "string"
+                ? (initialCategories as string[])
+                : (initialCategories as { id: string }[]).map((c) => c.id))
+            : [];
+        setCategories(arr);
+    }, [open, initialTitle, initialContent, initialCategories]);
+
     if (!open) return null;
 
     const toggleCat = (id: string) =>
@@ -36,12 +71,10 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
 
     const validate = () => {
         const next: FieldErrors = {};
-
-        if (!title.trim()) next.title = "Create a title";
+        if (!title.trim()) next.title = "Title is required";
         if (!content.trim()) next.content = "Content cannot be empty";
         if (categories.length === 0) next.categories = "Select at least one category";
         if (categories.length > 5) next.categories = "You can select up to 5 categories";
-
         setErrors(next);
         return Object.keys(next).length === 0;
     };
@@ -53,26 +86,15 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
 
         setLoading(true);
         try {
-            const uid = getCurrentUserId();
-            if (!uid) {
-                setErrors({ common: "Unauthorized" });
-                return;
-            }
-
-            await createPost({
-                author_id: uid,
+            const updated = await updatePost({
+                id: postId,
                 title,
                 content,
                 categories: categories.slice(0, 5),
             });
 
             onClose();
-            onCreated?.();
-
-            setTitle("");
-            setContent("");
-            setCategories([]);
-            setCatsOpen(false);
+            onUpdated?.(updated); // <-- отдаём весь пост наверх
         } catch (err: any) {
             setErrors({ common: err?.response?.data?.error || err?.message || "Internal Error" });
         } finally {
@@ -84,7 +106,7 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
         <div className={s.backdrop} onClick={onClose}>
             <div className={s.modal} onClick={(e) => e.stopPropagation()}>
                 <div className={s.header}>
-                    <div className={s.title}>New post</div>
+                    <div className={s.title}>Edit post</div>
                     <button className={s.close} onClick={onClose}>×</button>
                 </div>
 
@@ -100,7 +122,7 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
                             className={clsx(s.input, errors.title && s.invalid)}
                             value={title}
                             onChange={(e) => setTitle(e.currentTarget.value)}
-                            placeholder="What is your post about?"
+                            placeholder="Update the title"
                             maxLength={256}
                         />
                         {errors.title && <div className={s.errSmall}>{errors.title}</div>}
@@ -114,7 +136,7 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
                             value={content}
                             onChange={(e) => setContent(e.currentTarget.value)}
                             rows={8}
-                            placeholder="Write something useful..."
+                            placeholder="Update the content…"
                         />
                         {errors.content && <div className={s.errSmall}>{errors.content}</div>}
                     </div>
@@ -151,18 +173,14 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
                                         {c.title}
                                     </label>
                                 ))}
-                                {cats.length === 0 && <div className={s.hint}>Категории не найдены</div>}
+                                {cats.length === 0 && <div className={s.hint}>No categories found</div>}
                             </div>
                         </div>
                     </div>
 
                     <div className={s.footer}>
-                        <Button type="button" onClick={onClose}>
-                            Cancel
-                        </Button>
-                        <Button type="submit" disabled={loading}>
-                            Create
-                        </Button>
+                        <Button type="button" onClick={onClose}>Cancel</Button>
+                        <Button type="submit" disabled={loading}>Save</Button>
                     </div>
                 </form>
             </div>
