@@ -9,28 +9,58 @@ import CreatePostModal from "@pages/posts/CreatePostModal.tsx";
 
 import s from "@/pages/posts/PostsFeedPage.module.scss";
 import Button from "@components/ui/Button.tsx";
+import { api } from "@/features/client";
+import type {ListPostsParams} from "@features/posts/posts.ts"; // твой axios инстанс
+
+type CategoryRow = { id: string; title: string };
+
+function useCategories() {
+    const [items, setItems] = React.useState<CategoryRow[]>([]);
+    const [loading, setLoading] = React.useState(false);
+    const [err, setErr] = React.useState<string | null>(null);
+
+    React.useEffect(() => {
+        let ok = true;
+        (async () => {
+            setLoading(true);
+            setErr(null);
+            try {
+                const r = await api.get("/categories");
+                // если у тебя JSON:API — тут распарси по-своему, ниже — примитив
+                setItems(r.data?.data ?? r.data ?? []);
+            } catch (e: any) {
+                setErr(e?.message ?? "Failed to load categories");
+            } finally {
+                if (ok) setLoading(false);
+            }
+        })();
+        return () => { ok = false; };
+    }, []);
+
+    return { items, loading, err };
+}
 
 export default function PostsFeedPage() {
     const [q, setQ] = React.useState("");
     const [orderBy, setOrderBy] = React.useState<"rating" | "created_at" | "likes" | "dislikes">("rating");
     const [createOpen, setCreateOpen] = React.useState(false);
+    const [categoryId, setCategoryId] = React.useState<string>("");
+
+    const { items: categories, loading: catLoading, err: catErr } = useCategories();
+
+    const filters = React.useMemo<ListPostsParams>(() => ({
+        title: q || undefined,
+        order_by: orderBy,
+        order_dir: "desc",
+        category_id: categoryId || undefined,
+    }), [q, orderBy, categoryId]);
 
     const { items, loading, err, hasMore, loadMore, reload } = usePostsFeed({
         pageSize: 10,
-        baseFilters: {
-            title: q || undefined,
-            order_by: orderBy,
-            order_dir: "desc",
-        },
+        baseFilters: filters,
     });
 
-    React.useEffect(() => {
-        reload();
-    }, [q, orderBy]);
-
-    const onCreated = () => {
-        reload();
-    };
+    const onCreated = () => reload();
 
     return (
         <div className={s.root}>
@@ -51,8 +81,22 @@ export default function PostsFeedPage() {
                         <option value="likes">most likes</option>
                         <option value="dislikes">most dislikes</option>
                     </select>
+
+                    <select
+                        className={s.btn}
+                        value={categoryId}
+                        onChange={(e) => setCategoryId(e.currentTarget.value)}
+                        disabled={catLoading}
+                        title="Filter by category"
+                    >
+                        <option value="">all categories</option>
+                        {categories.map((c) => (
+                            <option key={c.id} value={c.id}>{c.title}</option>
+                        ))}
+                    </select>
                 </div>
 
+                {catErr && <div className={s.error}>Failed to load categories: {catErr}</div>}
                 {err && <div className={s.error}>{err}</div>}
 
                 <div className={s.list}>
