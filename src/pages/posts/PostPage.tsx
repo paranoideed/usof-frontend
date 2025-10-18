@@ -5,6 +5,7 @@ import { api } from "@/features/client";
 import s from "./PostPage.module.scss";
 import PostFull from "@components/posts/PostFull";
 import type { Post } from "@/features/posts/posts";
+import CommentsSection from "@components/comments/CommentsSection.tsx";
 
 export default function PostPage() {
     const navigate = useNavigate();
@@ -48,6 +49,7 @@ export default function PostPage() {
             <NavBar />
             <div className={s.container}>
                 <PostFull {...post} />
+                {id && <CommentsSection postId={id} />}
             </div>
         </div>
     );
