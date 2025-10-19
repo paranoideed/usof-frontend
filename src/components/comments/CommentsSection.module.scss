@@ -20,3 +20,16 @@
 .moreWrap { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
 .moreBtn { padding: 8px 14px; border-radius: 8px; }
 .totalHint { opacity: .7; font-size: 12px; }
+
+.actions { display: flex; gap: 12px; margin-top: 6px; }
+.linkBtn { background: none; border: none; cursor: pointer; padding: 0; text-decoration: underline; }
+
+.replyForm { margin-top: 8px; }
+
+.reactions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.count { opacity: .8; font-size: 12px; min-width: 18px; text-align: center; }

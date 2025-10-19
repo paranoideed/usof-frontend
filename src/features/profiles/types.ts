@@ -1,4 +1,4 @@
-export type profile = {
+export type Profile = {
     id:         string;
     username:   string;
     pseudonym?: string | null;
@@ -7,5 +7,9 @@ export type profile = {
     created_at: Date;
 };
 
-
-
+export type ProfileList = {
+    items: Profile[];
+    total: number;
+    limit: number;
+    offset: number;
+};

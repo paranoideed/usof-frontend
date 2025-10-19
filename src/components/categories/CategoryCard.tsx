@@ -1,12 +1,12 @@
-import type {CategoryRow} from "@/features/categories/categories.ts";
+import type {Category} from "@/features/categories/categories.ts";
 import { isAdmin } from "@/features/auth/sessions";
 import s from "./CategoryCard.module.scss";
 
 
 export type CategoryCardProps = {
-    item: CategoryRow;
-    onEdit?: (cat: CategoryRow) => void;
-    onDelete?: (cat: CategoryRow) => void;
+    item: Category;
+    onEdit?: (cat: Category) => void;
+    onDelete?: (cat: Category) => void;
 };
 
 

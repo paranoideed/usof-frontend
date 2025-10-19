@@ -1,16 +1,18 @@
 import React from "react";
-import { listCategories, deleteCategory, type CategoryRow } from "@/features/categories/categories.ts"
 import CategoryGrid from "@/components/categories/CategoryGrid";
 import { isAdmin } from "@/features/auth/sessions";
 import { useNavigate, Link } from "react-router-dom";
 import s from "./CategoriesPage.module.scss";
 import NavBar from "@components/ui/NavBar.tsx";
+import {listCategories} from "@features/categories/list.ts";
+import type {Category} from "@features/categories/types.ts";
+import {deleteCategory} from "@features/categories/delete.ts";
 
 const PAGE_SIZE = 20; // сколько карточек грузим за раз
 
 export default function CategoriesPage() {
-    const [all, setAll] = React.useState<CategoryRow[]>([]);
-    const [visible, setVisible] = React.useState<CategoryRow[]>([]);
+    const [all, setAll] = React.useState<Category[]>([]);
+    const [visible, setVisible] = React.useState<Category[]>([]);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
     const [hasMore, setHasMore] = React.useState(false);
@@ -52,7 +54,7 @@ export default function CategoriesPage() {
         }
     }
 
-    async function handleDelete(cat: CategoryRow) {
+    async function handleDelete(cat: Category) {
         if (!confirm(`Удалить категорию «${cat.title}»?`)) return;
         const prev = visible;
         setVisible((v) => v.filter((x) => x.id !== cat.id));
@@ -65,7 +67,7 @@ export default function CategoriesPage() {
         }
     }
 
-    function handleEdit(cat: CategoryRow) {
+    function handleEdit(cat: Category) {
         navigate(`/categories/${cat.id}/edit`);
     }
 

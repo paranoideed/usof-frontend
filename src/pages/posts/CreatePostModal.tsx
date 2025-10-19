@@ -1,10 +1,11 @@
 import * as React from "react";
 import s from "./CreatePostModal.module.scss";
-import type { CategoryRow } from "@/features/categories/categories";
-import { createPost, listCategories } from "@/features/posts/posts.ts";
 import { getCurrentUserId } from "@features/auth/sessions.ts";
 import Button from "@components/ui/Button.tsx";
 import clsx from "clsx";
+import {createPost} from "@features/posts/create.ts";
+import type {Category, ListCategories} from "@features/categories/types.ts";
+import {listCategories} from "@features/categories/list.ts";
 
 type Props = { open: boolean; onClose: () => void; onCreated?: () => void };
 type FieldErrors = { common?: string; title?: string; content?: string; categories?: string };
@@ -13,7 +14,7 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
     const [title, setTitle] = React.useState("");
     const [content, setContent] = React.useState("");
     const [categories, setCategories] = React.useState<string[]>([]);
-    const [cats, setCats] = React.useState<CategoryRow[]>([]);
+    const [cats, setCats] = React.useState<Category[]>([]);
     const [loading, setLoading] = React.useState(false);
     const [errors, setErrors] = React.useState<FieldErrors>({});
     const [catsOpen, setCatsOpen] = React.useState(false);
@@ -22,7 +23,7 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
         if (!open) return;
         (async () => {
             try {
-                setCats(await listCategories());
+                setCats(await listCategories({}).then((res: ListCategories) => res.data) );
             } catch {
                 /* no-op */
             }

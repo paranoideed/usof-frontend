@@ -1,8 +1,11 @@
 import * as React from "react";
 import { z } from "zod";
-import { createComment, fetchComments, type Comment } from "@/features/comments/comments";
 import { getCurrentUserId } from "@/features/auth/sessions";
 import s from "./CommentsSection.module.scss";
+import CommentThread from "@components/comments/CommentThread.tsx";
+import {fetchCommentsByParent} from "@features/comments/fetched.ts";
+import {createComment} from "@features/comments/create.ts";
+import type { Comment } from "@features/comments/types";
 
 type Props = { postId: string };
 
@@ -29,15 +32,11 @@ export default function CommentsSection({ postId }: Props) {
     // начальная загрузка
     React.useEffect(() => {
         let ignore = false;
-        setLoading(true);
-        setErr(null);
-        setItems([]);
-        setOffset(0);
-        setTotal(null);
+        setLoading(true); setErr(null); setItems([]); setOffset(0); setTotal(null);
 
         (async () => {
             try {
-                const res = await fetchComments(postId, PAGE_SIZE, 0);
+                const res = await fetchCommentsByParent(postId, null, PAGE_SIZE, 0);
                 if (ignore) return;
                 setItems(res.data ?? []);
                 if (typeof res.total === "number") setTotal(res.total);
@@ -48,24 +47,18 @@ export default function CommentsSection({ postId }: Props) {
                 if (!ignore) setLoading(false);
             }
         })();
-
         return () => { ignore = true; };
     }, [postId]);
 
-    // догрузка “Ещё”
     const loadMore = async () => {
         if (loadingMore) return;
         setLoadingMore(true);
         try {
-            const res = await fetchComments(postId, PAGE_SIZE, offset);
+            const res = await fetchCommentsByParent(postId, null, PAGE_SIZE, offset);
             setItems((prev) => [...prev, ...(res.data ?? [])]);
             if (typeof res.total === "number") setTotal(res.total);
             setOffset((res.offset ?? offset) + (res.limit ?? PAGE_SIZE));
-        } catch (e: any) {
-            // показывать общий тост не будем — не критично
-        } finally {
-            setLoadingMore(false);
-        }
+        } finally { setLoadingMore(false); }
     };
 
     // отправка нового коммента
@@ -139,15 +132,14 @@ export default function CommentsSection({ postId }: Props) {
                 <>
                     <ul className={s.list}>
                         {items.map((c) => (
-                            <li key={c.data.id} className={s.item}>
-                                <div className={s.header}>
-                                    <span className={s.author}>@{c.data.author_username}</span>
-                                    <time className={s.time}>
-                                        {new Date(c.data.created_at).toLocaleString()}
-                                    </time>
-                                </div>
-                                <p className={s.content}>{c.data.content}</p>
-                            </li>
+                            <CommentThread
+                                key={c.data.id}
+                                postId={postId}
+                                comment={c}
+                                onLocalReplyAdded={(_child) => {
+                                    // если ответ добавлен в эту ветку — ничего в корневом списке менять не нужно
+                                }}
+                            />
                         ))}
                     </ul>
 
@@ -158,8 +150,8 @@ export default function CommentsSection({ postId }: Props) {
                             </button>
                             {typeof total === "number" && (
                                 <span className={s.totalHint}>
-                  Показано {items.length} из {total}
-                </span>
+                                    Показано {items.length} из {total}
+                                </span>
                             )}
                         </div>
                     )}

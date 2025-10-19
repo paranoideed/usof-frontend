@@ -11,10 +11,10 @@ import { FormError, FormOk } from "@/components/ui/FormAlert";
 import useProfile from "./hooks/useProfile.ts";
 
 import logout from "@/features/auth/logout";
-import updateMeProfile from "@/features/profiles/updateMeProfile";
-import type {MeResponse} from "@/features/profiles/getMeProfile.ts";
+import type {MeResponse} from "@features/profiles/get.ts";
 
 import s from "./styles/profiles.module.scss";
+import {updateMe} from "@features/profiles/update.ts";
 
 export default function MyProfilePage() {
     const { data, loading, error, status, setData } = useProfile();
@@ -58,7 +58,7 @@ export default function MyProfilePage() {
 
         try {
             setSaving(true);
-            const updated = await updateMeProfile({ username: username.trim(), pseudonym: pseudonym.trim() || null });
+            const updated = await updateMe({ username: username.trim(), pseudonym: pseudonym.trim() || null });
 
             setData((prev: MeResponse | null) =>
                 prev

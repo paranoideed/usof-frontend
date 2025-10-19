@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { searchProfiles, type SearchProfilesResponse } from "@/features/profiles/searchProfiles.ts";
+import { list  } from "@features/profiles/list.ts";
+import type {ProfileList} from "@features/profiles/types.ts";
 
 function useDebounced<T>(value: T, delay = 350): T {
     const [v, setV] = useState(value);
@@ -17,7 +18,7 @@ export default function useProfilesSearch(initialQ = "", initialLimit = 10) {
 
     const dq = useDebounced(q, 350);
 
-    const [data, setData] = useState<SearchProfilesResponse | null>(null);
+    const [data, setData] = useState<ProfileList | null>(null);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState<string | null>(null);
 
@@ -35,7 +36,7 @@ export default function useProfilesSearch(initialQ = "", initialLimit = 10) {
 
         (async () => {
             try {
-                const res = await searchProfiles({ username: dq.trim(), limit, offset });
+                const res = await list({ username: dq.trim(), limit, offset });
                 if (!alive) return;
                 setData(res);
             } catch (e: any) {

@@ -1,4 +1,4 @@
-import { api } from "@/features/client";
+import type {Category} from "@features/categories/categories.ts";
 
 export type PostStatus = "active" | "closed";
 
@@ -11,51 +11,15 @@ export type PostData = {
     content:         string;
     likes:           number;
     dislikes:        number;
-    created_at:      string;              // <-- строки, как с бэка
+    created_at:      string;
     updated_at:      string | null;
-};
-
-export type Category = {
-    id:          string;
-    title:       string;
-    description: string;
-    created_at:  string;
-    updated_at:  string | null;
 };
 
 export type Post = {
     data:          PostData;
     categories:    Category[];
     user_reaction: string | null;
-    can_delete?: boolean; // <—
-}
-
-export type LikeType = "like" | "dislike";
-export type MyReaction = LikeType | null;
-
-export function parseMyReaction(s?: string | null): MyReaction {
-    return s === "like" || s === "dislike" ? s : null;
-}
-
-export async function getMyReaction(postId: string): Promise<MyReaction> {
-    try {
-        const { data } = await api.get(`/posts/${postId}`);
-        return parseMyReaction(data.user_reaction);
-    } catch {
-        try {
-            const post = await getPost(postId);
-            return parseMyReaction(post.user_reaction);
-        } catch {
-            return null;
-        }
-    }
-}
-
-// ---------- Posts ----------
-export async function getPost(id: string): Promise<Post> {
-    const { data } = await api.get<Post>(`/posts/${id}`);
-    console.log("post categories ", data.categories);
-    return data;
+    can_delete?:    boolean; // <—
 }
 
 export type PostsList = {
@@ -66,107 +30,3 @@ export type PostsList = {
         total: number;
     };
 };
-
-export type ListPostsParams = {
-    author_id?:       string;
-    author_username?: string;
-    status?:          PostStatus;
-    title?:           string;
-    category_id?:     string;
-    order_by?:  "created_at" | "updated_at" | "likes" | "dislikes" | "rating";
-    order_dir?: "asc" | "desc";
-    offset?: number;
-    limit?:  number;
-};
-
-export async function listPosts(params: ListPostsParams): Promise<PostsList> {
-    const resp = await api.get<PostsList>("/posts", {
-        params,
-        paramsSerializer: {
-            serialize(p) {
-                const sp = new URLSearchParams();
-                for (const [k, v] of Object.entries(p)) {
-                    if (v == null) continue;
-                    if (Array.isArray(v)) {
-                        v.forEach((it) => sp.append(`${k}[]`, String(it)));
-                    } else {
-                        sp.append(k, String(v));
-                    }
-                }
-                return sp.toString();
-            },
-        },
-    });
-    return resp.data;
-}
-
-export type CreatePostInput = {
-    author_id: string;
-    title:     string;
-    content:   string;
-    categories?: string[];
-};
-
-export async function createPost(input: CreatePostInput): Promise<Post> {
-    const payload = {
-        author_id:  input.author_id,
-        title:      input.title?.trim(),
-        content:    input.content?.trim(),
-        categories: input.categories && input.categories.length ? input.categories : undefined,
-    };
-    const { data } = await api.post<Post>("/posts", payload);
-    return data;
-}
-
-// ---------- Reactions ----------
-export async function likePost(postId: string, type: LikeType) {
-    const { data } = await api.post(`/posts/${postId}/like`, { type });
-    return data;
-}
-
-export async function unlikePost(postId: string) {
-    const { data } = await api.delete(`/posts/${postId}/like`);
-    return data;
-}
-
-// ---------- Categories (вернули экспорт) ----------
-export type ListCategoriesResponse = {
-    data:   Category[];
-    limit:  number | null;
-    offset: number | null;
-    total:  number | null;
-};
-
-export async function listCategories(limit = 100, offset = 0): Promise<Category[]> {
-    const { data } = await api.get<ListCategoriesResponse>("/categories", { params: { limit, offset } });
-    return data.data;
-}
-
-export async function deletePost(postId: string): Promise<void> {
-    await api.delete(`/posts/${postId}`);
-}
-
-export async function updatePostStatus(postId: string, status: PostStatus): Promise<void> {
-    await api.patch(`/posts/${postId}/status`, { status });
-}
-
-// features/posts/posts.ts
-export type PostUpdateInput = {
-    id: string;
-    title: string;
-    content: string;
-    categories: string[];
-};
-
-export async function updatePost(body: PostUpdateInput): Promise<Post> {
-    const { id, ...rest } = body;
-
-    const payload = {
-        title: rest.title?.trim(),
-        content: rest.content?.trim(),
-        categories: Array.isArray(rest.categories) ? rest.categories.slice(0, 5) : [],
-    };
-
-    const res = await api.put<Post>(`/posts/${id}`, payload);
-    return res.data;
-}

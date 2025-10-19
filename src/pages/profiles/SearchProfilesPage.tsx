@@ -44,7 +44,7 @@ export default function SearchProfilesPage() {
                         <div className={s.nothingFound}>Nothing found</div>
                     ) : (
                         <ul className={s.profilesList}>
-                            {data?.items.map(u => (
+                            {(data?.items ?? []).map(u => (
                                 <li key={u.id} className={s.profilesListItem}>
                                     <ProfileMini
                                         id={u.id}

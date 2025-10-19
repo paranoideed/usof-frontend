@@ -3,13 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 
 import {
     type Post,
-    type MyReaction,
-    parseMyReaction,
-    likePost,
-    unlikePost,
-    getPost,
-    deletePost,
-    updatePostStatus,
 } from "@/features/posts/posts";
 
 import { getCurrentUserId, getCurrentUserRole } from "@features/auth/sessions.ts";
@@ -22,6 +15,11 @@ import RatingPost from "@components/ui/RatingPost.tsx";
 import Button from "@components/ui/Button.tsx";
 import MarkdownView from "@components/ui/MarkdownView";
 import EditPostModal from "@pages/posts/EditPostModal.tsx";
+import {type MyReaction, parseMyReaction} from "@features/likes/types.ts";
+import {getPost} from "@features/posts/get.ts";
+import {likePost, unlikePost} from "@features/likes/posts.ts";
+import {deletePost} from "@features/posts/delete.ts";
+import {updatePostStatus} from "@features/posts/update.ts";
 
 export default function PostFull(props: Post) {
     const navigate = useNavigate();

@@ -10,7 +10,7 @@ import CreatePostModal from "@pages/posts/CreatePostModal.tsx";
 import s from "@/pages/posts/PostsFeedPage.module.scss";
 import Button from "@components/ui/Button.tsx";
 import { api } from "@/features/client";
-import type {ListPostsParams} from "@features/posts/posts.ts"; // твой axios инстанс
+import type {ListPostsParams} from "@features/posts/fetch.ts";
 
 type CategoryRow = { id: string; title: string };
 

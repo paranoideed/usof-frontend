@@ -1,9 +1,10 @@
-// CategoryFormPage.PostFull.tsx
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { createCategory, updateCategory, listCategories } from "@/features/categories/categories.ts";
 import { isAdmin } from "@/features/auth/sessions";
 import s from "./CategoryFormPage.module.scss";
+import {updateCategory} from "@features/categories/update.ts";
+import {createCategory} from "@features/categories/create.ts";
+import {listCategories} from "@features/categories/list.ts";
 
 export default function CategoryFormPage() {
     const { id } = useParams();
@@ -19,7 +20,7 @@ export default function CategoryFormPage() {
     React.useEffect(() => {
         if (!editing) return;
         setLoading(true);
-        listCategories({ offset: 0, limit: 100 })
+        listCategories(100, 0)
             .then((res) => {
                 const found = res.data.find((x) => x.id === id);
                 if (found) {

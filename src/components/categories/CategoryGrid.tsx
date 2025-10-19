@@ -1,12 +1,12 @@
-import type {CategoryRow} from "@/features/categories/categories";
+import type {Category} from "@/features/categories/categories";
 import CategoryCard from "./CategoryCard";
 import s from "./CategoryGrid.module.scss";
 
 
 export type CategoryGridProps = {
-    items: CategoryRow[];
-    onEdit?: (c: CategoryRow) => void;
-    onDelete?: (c: CategoryRow) => void;
+    items: Category[];
+    onEdit?: (c: Category) => void;
+    onDelete?: (c: Category) => void;
 };
 
 

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 
-import { getMeProfile, type MeResponse } from "@/features/profiles/getMeProfile.ts";
+import { getMeProfile, type MeResponse } from "@features/profiles/get.ts";
 
 export default function useProfile() {
     const [data, setData] = useState<MeResponse | null>(null);

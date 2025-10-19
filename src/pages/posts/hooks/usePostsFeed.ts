@@ -1,5 +1,6 @@
 import * as React from "react";
-import { listPosts, type ListPostsParams, type Post } from "@/features/posts/posts";
+import {listPosts, type ListPostsParams} from "@features/posts/fetch.ts";
+import type {Post} from "@features/posts/posts.ts";
 
 type UsePostsFeedOpts = {
     pageSize?: number;

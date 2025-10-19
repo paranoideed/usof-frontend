@@ -1,13 +1,12 @@
 import {useEffect, useState} from "react";
 
-import getProfileById from "@/features/profiles/getProfileById.ts";
-import getProfileByUsername from "@/features/profiles/getProfileByUsername.ts";
-import type {profile} from "@features/profiles/types.ts";
+import type {Profile} from "@features/profiles/types.ts";
+import {getProfileById, getProfileByUsername} from "@features/profiles/get.ts";
 
 type Params = { id?: string | null; username?: string | null };
 
 export default function useProfileBy({ id, username }: Params) {
-    const [data, setData] = useState<profile | null>(null);
+    const [data, setData] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [status, setStatus] = useState<number | null>(null);

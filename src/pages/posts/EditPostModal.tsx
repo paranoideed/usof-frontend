@@ -1,9 +1,11 @@
 import * as React from "react";
 import s from "./CreatePostModal.module.scss"; // переиспользуем те же стили
-import type { CategoryRow } from "@/features/categories/categories";
-import {listCategories, updatePost, type Post} from "@/features/posts/posts.ts";
 import Button from "@components/ui/Button.tsx";
 import clsx from "clsx";
+import type {Category} from "@features/categories/types.ts";
+import type {Post} from "@features/posts/posts.ts";
+import {listCategories} from "@features/categories/list.ts";
+import {updatePost} from "@features/posts/update.ts";
 
 type Props = {
     open: boolean;
@@ -35,7 +37,7 @@ export default function EditPostModal({
                 : (initialCategories as { id: string }[]).map((c) => c.id))
             : []
     );
-    const [cats, setCats] = React.useState<CategoryRow[]>([]);
+    const [cats, setCats] = React.useState<Category[]>([]);
     const [catsOpen, setCatsOpen] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
     const [errors, setErrors] = React.useState<FieldErrors>({});
@@ -44,7 +46,7 @@ export default function EditPostModal({
         if (!open) return;
         (async () => {
             try {
-                setCats(await listCategories());
+                setCats(await listCategories({}).then((res) => res.data));
             } catch {
                 /* no-op */
             }

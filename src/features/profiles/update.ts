@@ -11,7 +11,7 @@ export type UpdateMeResponse = {
     pseudonym: string | null;
 };
 
-export default async function updateMeProfile(input: UpdateMeInput): Promise<UpdateMeResponse> {
+export async function updateMe(input: UpdateMeInput): Promise<UpdateMeResponse> {
     try {
         const { data } = await api.post("/profiles/me", input);
         return data;

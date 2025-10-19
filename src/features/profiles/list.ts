@@ -1,5 +1,5 @@
 import { api } from "../client";
-import type {profile} from "./types.ts";
+import type {Profile, ProfileList} from "./types.ts";
 
 export type SearchProfilesParams = {
     username: string;
@@ -7,14 +7,8 @@ export type SearchProfilesParams = {
     offset?:  number;
 };
 
-export type SearchProfilesResponse = {
-    items: profile[];
-    total: number;
-    limit: number;
-    offset: number;
-};
 
-export async function searchProfiles(params: SearchProfilesParams): Promise<SearchProfilesResponse> {
+export async function list(params: SearchProfilesParams): Promise<ProfileList> {
     const { data } = await api.get(`/profiles`, {
         params: {
             username: params.username,
@@ -24,7 +18,7 @@ export async function searchProfiles(params: SearchProfilesParams): Promise<Sear
     });
 
     const srcItems = data.items ?? data.data ?? [];
-    const items: profile[] = srcItems.map((u: any) => ({
+    const items: Profile[] = srcItems.map((u: any) => ({
         id: u.id ?? u.user_id ?? u.data?.id,
         username: u.username ?? u.login ?? u.data?.attributes?.username,
         pseudonym: u.pseudonym ?? u.data?.attributes?.pseudonym ?? null,
