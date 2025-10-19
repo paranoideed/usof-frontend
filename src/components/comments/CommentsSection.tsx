@@ -1,11 +1,12 @@
 import * as React from "react";
 import { z } from "zod";
 import { getCurrentUserId } from "@/features/auth/sessions";
-import s from "./CommentsSection.module.scss";
+import s from "./style/comments.module.scss";
 import CommentThread from "@components/comments/CommentThread.tsx";
 import {fetchCommentsByParent} from "@features/comments/fetched.ts";
 import {createComment} from "@features/comments/create.ts";
 import type { Comment } from "@features/comments/types";
+import Button from "@components/ui/Button.tsx";
 
 type Props = { postId: string };
 
@@ -100,34 +101,35 @@ export default function CommentsSection({ postId }: Props) {
 
     return (
         <div className={s.root}>
-            <h3 className={s.title}>Комментарии</h3>
+            <h3 className={s.title}>Comments</h3>
 
-            {/* форма */}
             <form className={s.form} onSubmit={onSubmit}>
         <textarea
             className={s.textarea}
             value={value}
             onChange={(e) => setValue(e.currentTarget.value)}
-            placeholder="Напишите комментарий…"
+            placeholder="Write comment…"
             maxLength={1000}
             rows={4}
         />
                 <div className={s.formBar}>
                     <span className={s.counter}>{value.length}/1000</span>
-                    <button className={s.submit} disabled={posting || value.trim().length === 0}>
-                        {posting ? "Отправка…" : "Отправить"}
-                    </button>
+                    <div>
+                        <Button className={s.submit} disabled={posting || value.trim().length === 0}>
+                            {posting ? "Sending…" : "Send"}
+                        </Button>
+                    </div>
                 </div>
                 {fieldErr && <div className={s.fieldErr}>{fieldErr}</div>}
             </form>
 
             {/* список */}
             {loading ? (
-                <div className={s.loading}>Загрузка…</div>
+                <div className={s.loading}>Loading…</div>
             ) : err ? (
-                <div className={s.error}>Ошибка: {err}</div>
+                <div className={s.error}>Error: {err}</div>
             ) : items.length === 0 ? (
-                <div className={s.empty}>Пока нет комментариев</div>
+                <div className={s.empty}>No comments</div>
             ) : (
                 <>
                     <ul className={s.list}>
@@ -136,8 +138,9 @@ export default function CommentsSection({ postId }: Props) {
                                 key={c.data.id}
                                 postId={postId}
                                 comment={c}
-                                onLocalReplyAdded={(_child) => {
-                                    // если ответ добавлен в эту ветку — ничего в корневом списке менять не нужно
+                                onDeleted={(id) => {
+                                    setItems((prev) => prev.filter((x) => x.data.id !== id));
+                                    setTotal((t) => (typeof t === "number" ? Math.max(0, t - 1) : t));
                                 }}
                             />
                         ))}
@@ -145,9 +148,11 @@ export default function CommentsSection({ postId }: Props) {
 
                     {hasMore && (
                         <div className={s.moreWrap}>
-                            <button className={s.moreBtn} onClick={loadMore} disabled={loadingMore}>
-                                {loadingMore ? "Загрузка…" : "Ещё"}
-                            </button>
+                            <div>
+                                <Button onClick={loadMore} disabled={loadingMore}>
+                                    {loadingMore ? "Loading…" : "More"}
+                                </Button>
+                            </div>
                             {typeof total === "number" && (
                                 <span className={s.totalHint}>
                                     Показано {items.length} из {total}

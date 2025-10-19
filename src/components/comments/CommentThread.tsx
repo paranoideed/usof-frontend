@@ -1,25 +1,33 @@
 import * as React from "react";
 import { z } from "zod";
-import { getCurrentUserId } from "@/features/auth/sessions";
-import s from "./CommentsSection.module.scss";
-import CommentReactions from "@components/comments/CommentReactions.tsx";
-import {fetchCommentsByParent} from "@features/comments/fetched.ts";
-import {createComment} from "@features/comments/create.ts";
-import {parseMyReaction} from "@features/likes/types.ts";
-import type { Comment } from "@features/comments/types";
+
+import { getCurrentUserId, getCurrentUserRole } from "@/features/auth/sessions";
+import s from "./style/comments.module.scss";
+
+import CommentReactions from "@/components/comments/CommentReactions";
+import { fetchCommentsByParent } from "@/features/comments/fetched";
+import { createComment } from "@/features/comments/create";
+import {canDeleteComment, deleteComment} from "@/features/comments/delete";
+
+import { parseMyReaction } from "@/features/likes/types"; // как у тебя
+import type { Comment } from "@/features/comments/types";
+import Button from "@components/ui/Button.tsx";
 
 const ContentSchema = z.string().min(1, "Пустой комментарий").max(1000, "Слишком длинно");
 const PAGE_SIZE = 10;
 
 type Props = {
     postId: string;
-    comment: Comment;                    // корневой комментарий ветки
-    depth?: number;                      // на будущее, если захочешь многоуровневость
+    comment: Comment;            // корневой комментарий ветки
+    depth?: number;
     onLocalReplyAdded?: (c: Comment) => void;
+    onDeleted?: (id: string) => void;    // сообщим родителю, если удалили корневой
 };
 
-export default function CommentThread({ postId, comment, depth = 0 }: Props) {
-    const [showReplies, setShowReplies] = React.useState(false);
+export default function CommentThread({ postId, comment, depth = 0, onDeleted }: Props) {
+    const [showReply, setShowReply] = React.useState(false);      // форма ответа
+    const [showReplies, setShowReplies] = React.useState(false);  // список ответов
+
     const [replyText, setReplyText] = React.useState("");
     const [replyErr, setReplyErr] = React.useState<string | null>(null);
     const [posting, setPosting] = React.useState(false);
@@ -30,11 +38,19 @@ export default function CommentThread({ postId, comment, depth = 0 }: Props) {
     const [loadingReplies, setLoadingReplies] = React.useState(false);
     const [loadingMore, setLoadingMore] = React.useState(false);
 
+    const [deleting, setDeleting] = React.useState(false);
+    const [deleteErr, setDeleteErr] = React.useState<string | null>(null);
+
+    const meId = getCurrentUserId();
+    const role = getCurrentUserRole();
+
+    const canDeleteRoot = canDeleteComment(comment, meId, role);
+    const hasReplies = (rTotal ?? 0) > 0 || replies.length > 0;
+
     const hasMoreReplies = rTotal !== null
         ? replies.length < rTotal
         : replies.length !== 0 && replies.length % PAGE_SIZE === 0;
 
-    // лениво: загрузим первую порцию ответов при первом раскрытии блока
     const ensureLoadReplies = async () => {
         if (loadingReplies || replies.length > 0 || rOffset > 0) return;
         setLoadingReplies(true);
@@ -43,7 +59,9 @@ export default function CommentThread({ postId, comment, depth = 0 }: Props) {
             setReplies(res.data ?? []);
             if (typeof res.total === "number") setRTotal(res.total);
             setROffset((res.offset ?? 0) + (res.limit ?? PAGE_SIZE));
-        } finally { setLoadingReplies(false); }
+        } finally {
+            setLoadingReplies(false);
+        }
     };
 
     const loadMoreReplies = async () => {
@@ -54,53 +72,70 @@ export default function CommentThread({ postId, comment, depth = 0 }: Props) {
             setReplies((prev) => [...prev, ...(res.data ?? [])]);
             if (typeof res.total === "number") setRTotal(res.total);
             setROffset((res.offset ?? rOffset) + (res.limit ?? PAGE_SIZE));
-            setShowReplies(true); // на всякий случай держим открытым при догрузке
-        } finally { setLoadingMore(false); }
+            setShowReplies(true);
+        } finally {
+            setLoadingMore(false);
+        }
     };
-
-    const labelRepliesBtn =
-        showReplies ? "Скрыть ответы"
-            : (replies.length > 0 || rOffset > 0) ? "Показать ответы"
-                : "Показать ответы";
 
     const toggleReplies = async () => {
         if (!showReplies) {
-            // раскрываем — при первом открытии подгружаем
             await ensureLoadReplies();
             setShowReplies(true);
         } else {
-            // скрываем
             setShowReplies(false);
         }
     };
 
+    const labelRepliesBtn = showReplies ? "Hide answers " : "Show answers";
+
     const submitReply = async (e: React.FormEvent) => {
         e.preventDefault();
         setReplyErr(null);
+
         const parsed = ContentSchema.safeParse(replyText.trim());
         if (!parsed.success) {
-            setReplyErr(parsed.error.issues[0]?.message ?? "Неверный текст");
+            setReplyErr(parsed.error.issues[0]?.message ?? "Invalid text");
             return;
         }
         const authorId = getCurrentUserId();
-        if (!authorId) { setReplyErr("Нужно войти, чтобы отвечать"); return; }
+        if (!authorId) { setReplyErr("Need login for response"); return; }
 
         setPosting(true);
         try {
             const created = await createComment({
                 post_id: postId,
                 author_id: authorId,
-                parent_id: comment.data.id,         // ← главное место
+                parent_id: comment.data.id,
                 content: parsed.data,
             });
-            // Положим новый ответ в начало списка
+
             setReplies((prev) => [created, ...prev]);
             setRTotal((t) => (typeof t === "number" ? t + 1 : t));
             setReplyText("");
-            setShowReplies(false);
+            setShowReply(false);
+            setShowReplies(true);
         } catch (e: any) {
-            setReplyErr(e?.response?.data?.error ?? e?.message ?? "Не удалось отправить ответ");
-        } finally { setPosting(false); }
+            setReplyErr(e?.response?.data?.error ?? e?.message ?? "Failed to post reply");
+        } finally {
+            setPosting(false);
+        }
+    };
+
+    const handleDeleteRoot = async () => {
+        if (deleting) return;
+        if (!confirm("Delete comment?")) return;
+
+        setDeleting(true);
+        setDeleteErr(null);
+        try {
+            await deleteComment(comment.data.id);
+            onDeleted?.(comment.data.id);
+        } catch (e: any) {
+            setDeleteErr(e?.response?.data?.error ?? e?.message ?? "Failed to delete comment");
+        } finally {
+            setDeleting(false);
+        }
     };
 
     return (
@@ -109,38 +144,63 @@ export default function CommentThread({ postId, comment, depth = 0 }: Props) {
                 <span className={s.author}>@{comment.data.author_username}</span>
                 <time className={s.time}>{new Date(comment.data.created_at).toLocaleString()}</time>
             </div>
+
             <p className={s.content}>{comment.data.content}</p>
 
-            <CommentReactions
-                commentId={comment.data.id}
-                initialLikes={comment.data.likes}
-                initialDislikes={comment.data.dislikes}
-                initialMyReaction={parseMyReaction(comment.user_reaction)}
-            />
 
-            <div className={s.actions}>
-                <button className={s.linkBtn} onClick={() => setShowReplies((v) => !v)}>
-                    {showReplies ? "Отмена" : "Ответить"}
-                </button>
-                <button className={s.linkBtn} onClick={toggleReplies}>
-                    {labelRepliesBtn}
-                </button>
+            <div className={s.btnFooter}>
+                <div>
+                    <CommentReactions
+                        commentId={comment.data.id}
+                        initialLikes={comment.data.likes}
+                        initialDislikes={comment.data.dislikes}
+                        initialMyReaction={parseMyReaction(comment.user_reaction)}
+                    />
+                </div>
+                <div className={s.actions}>
+                <div>
+                    <Button onClick={() => setShowReply((v) => !v)}>
+                        {showReply ? "Cansel" : "Answer"}
+                    </Button>
+                </div>
+                <div>
+                    {hasReplies && (
+                        <Button onClick={toggleReplies}>
+                            {labelRepliesBtn}
+                        </Button>
+                    )}
+                </div>
+                {canDeleteRoot && (
+                    <div>
+                        <Button
+                            onClick={handleDeleteRoot}
+                            disabled={deleting}
+                            aria-label="Delete comment"
+                            title="Delete comment"
+                        >
+                            {deleting ? "Deleting…" : "Delete"}
+                        </Button>
+                    </div>
+                )}
+                </div>
             </div>
 
-            {showReplies && (
+            {deleteErr && <div className={s.fieldErr}>{deleteErr}</div>}
+
+            {showReply && (
                 <form className={s.replyForm} onSubmit={submitReply}>
           <textarea
               className={s.textarea}
               value={replyText}
               onChange={(e) => setReplyText(e.currentTarget.value)}
-              placeholder="Ваш ответ…"
+              placeholder="Your Answer…"
               maxLength={1000}
               rows={3}
           />
                     <div className={s.formBar}>
                         <span className={s.counter}>{replyText.length}/1000</span>
                         <button className={s.submit} disabled={posting || replyText.trim().length === 0}>
-                            {posting ? "Отправка…" : "Отправить"}
+                            {posting ? "Sending…" : "Send"}
                         </button>
                     </div>
                     {replyErr && <div className={s.fieldErr}>{replyErr}</div>}
@@ -153,21 +213,45 @@ export default function CommentThread({ postId, comment, depth = 0 }: Props) {
                     {loadingReplies ? (
                         <div className={s.loading}>Загрузка ответов…</div>
                     ) : (
-                        replies.map((r) => (
-                            <li key={r.data.id} className={s.item} style={{ marginLeft: 16 }}>
-                                <div className={s.header}>
-                                    <span className={s.author}>@{r.data.author_username}</span>
-                                    <time className={s.time}>{new Date(r.data.created_at).toLocaleString()}</time>
-                                </div>
-                                <p className={s.content}>{r.data.content}</p>
-                                <CommentReactions
-                                    commentId={r.data.id}
-                                    initialLikes={r.data.likes}
-                                    initialDislikes={r.data.dislikes}
-                                    initialMyReaction={parseMyReaction(r.user_reaction)}
-                                />
-                            </li>
-                        ))
+                        replies.map((r) => {
+                            const replyCanDelete = canDeleteComment(r, meId, role);
+
+                            const deleteReply = async () => {
+                                if (!confirm("Delete Answer?")) return;
+                                try {
+                                    await deleteComment(r.data.id);
+                                    setReplies((prev) => prev.filter((x) => x.data.id !== r.data.id));
+                                    setRTotal((t) => (typeof t === "number" ? Math.max(0, t - 1) : t));
+                                } catch {
+                                    //TODO: show error
+                                }
+                            };
+
+                            return (
+                                <li key={r.data.id} className={s.item} style={{ marginLeft: 16 }}>
+                                    <div className={s.header}>
+                                        <span className={s.author}>@{r.data.author_username}</span>
+                                        <time className={s.time}>{new Date(r.data.created_at).toLocaleString()}</time>
+                                    </div>
+                                    <p className={s.content}>{r.data.content}</p>
+
+                                    <CommentReactions
+                                        commentId={r.data.id}
+                                        initialLikes={r.data.likes}
+                                        initialDislikes={r.data.dislikes}
+                                        initialMyReaction={parseMyReaction(r.user_reaction)}
+                                    />
+
+                                    <div className={s.actions}>
+                                        {replyCanDelete && (
+                                            <button className={s.linkBtn} onClick={deleteReply}>
+                                                Удалить
+                                            </button>
+                                        )}
+                                    </div>
+                                </li>
+                            );
+                        })
                     )}
                 </ul>
             )}
@@ -175,7 +259,7 @@ export default function CommentThread({ postId, comment, depth = 0 }: Props) {
             {showReplies && hasMoreReplies && (
                 <div className={s.moreWrap}>
                     <button className={s.moreBtn} onClick={loadMoreReplies} disabled={loadingMore}>
-                        {loadingMore ? "Загрузка…" : "Ещё ответы"}
+                        {loadingMore ? "Loading…" : "Show answers"}
                     </button>
                     {typeof rTotal === "number" && (
                         <span className={s.totalHint}>Показано {replies.length} из {rTotal}</span>

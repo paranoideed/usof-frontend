@@ -11,7 +11,7 @@ function isEmail(value: string) {
     return /\S+@\S+\.\S+/.test(value);
 }
 
-export async function login(input: LoginInput) {
+export async function login(input: LoginInput): Promise<UserToken> {
     const { identifier, password } = input;
 
     const payload: Record<string, string> = { password };

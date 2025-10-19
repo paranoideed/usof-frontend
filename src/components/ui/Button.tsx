@@ -5,8 +5,6 @@ type Props = React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 export default function Button({ children, className = "", ...rest }: Props) {
     return (
-        <button className={[s.button, className].join(" ")} {...rest}>
-            {children}
-        </button>
+        <button className={[s.button, className].join(" ")} {...rest}>{children}</button>
     );
 }

@@ -4,9 +4,7 @@ export type UserRole = "admin" | "user" | string;
 
 
 function decodeBase64Url(input: string): string {
-    // base64url -> base64
     const base64 = input.replace(/-/g, "+").replace(/_/g, "/");
-    // add padding if needed
     const pad = base64.length % 4 === 0 ? 0 : 4 - (base64.length % 4);
     const padded = base64 + "=".repeat(pad);
     try {
@@ -16,11 +14,9 @@ function decodeBase64Url(input: string): string {
     }
 }
 
-
 export function getAccessToken(): string | null {
     return Cookies.get("token") || null;
 }
-
 
 export function parseJwtPayload<T = any>(token: string | null): T | null {
     if (!token) return null;
@@ -33,7 +29,6 @@ export function parseJwtPayload<T = any>(token: string | null): T | null {
         return null;
     }
 }
-
 
 export function getCurrentUserRole(): UserRole | null {
     const token = getAccessToken();

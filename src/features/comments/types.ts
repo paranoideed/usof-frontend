@@ -8,7 +8,7 @@ export type CommentData = {
     content:         string;
     likes:           number;
     dislikes:        number;
-    created_at:      string; // Date как ISO-строка с бэка
+    created_at:      string;
     updated_at:      string | null;
 };
 

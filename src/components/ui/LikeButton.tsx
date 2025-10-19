@@ -7,12 +7,12 @@ type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 export default function LikeButton({
-                                       className = "",
-                                       active = false,
-                                       count = 0,
-                                       children,
-                                       ...rest
-                                   }: Props) {
+        className = "",
+        active = false,
+        count = 0,
+        children,
+        ...rest
+    }: Props) {
     return (
         <button
             className={[s.like, active ? s.active : "", className].join(" ")}

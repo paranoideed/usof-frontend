@@ -8,7 +8,7 @@ type Props = {
     username: string;
     pseudonym?: string | null;
     avatar?: string | null;
-    to?: string; // опционально: ссылка, по умолчанию /profiles/id/:id
+    to?: string;
 };
 
 export default function ProfileMini({ id, username, pseudonym, avatar, to }: Props) {

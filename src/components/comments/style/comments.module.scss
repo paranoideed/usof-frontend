@@ -1,0 +1,148 @@
+@use "../../../styles/variables" as *;
+
+.root {
+  margin-top: 24px;
+}
+
+.title {
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 0;
+  background: $main;
+  border: 1px solid $main-border;
+  color: $text-primary;
+}
+
+.formBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.counter {
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+.submit {
+  padding: 8px 14px;
+  border-radius: 8px;
+}
+
+.fieldErr {
+  color: #e33;
+  font-size: 13px;
+}
+
+.loading,
+.error,
+.empty {
+  opacity: 0.8;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.header {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.author {
+  font-weight: 600;
+}
+
+.time {
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+.content {
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.moreWrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.moreBtn {
+  padding: 8px 14px;
+  border-radius: 8px;
+}
+
+.totalHint {
+  opacity: 0.7;
+  font-size: 12px;
+}
+
+.btnFooter {
+  margin-top: 6px;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-content: center
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin: 6px;
+}
+
+.linkBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.replyForm {
+  margin-top: 8px;
+}
+
+.reactions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.count {
+  opacity: 0.8;
+  font-size: 12px;
+  min-width: 18px;
+  text-align: center;
+}

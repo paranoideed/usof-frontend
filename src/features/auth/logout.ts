@@ -1,7 +1,7 @@
 import Cookies from "js-cookie";
 import { api } from "../client";
 
-export default async function logout() {
+export default async function logout(): Promise<void> {
     try {
         await api.post("/auth/logout");
     } catch {

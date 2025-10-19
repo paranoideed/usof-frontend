@@ -7,7 +7,7 @@ export type RegisterInput = {
     passwordConfirm: string;
 };
 
-export async function register(input: RegisterInput) {
+export async function register(input: RegisterInput): Promise<any> {
     const payload = {
         email: input.email,
         username: input.username,

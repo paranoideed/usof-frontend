@@ -1,4 +1,4 @@
-import type {Category} from "@features/categories/categories.ts";
+import type {Category} from "@features/categories/types.ts";
 
 export type PostStatus = "active" | "closed";
 

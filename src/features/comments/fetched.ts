@@ -8,7 +8,6 @@ export type ListCommentsResponse = {
     offset?: number | null;
 };
 
-// --- API ---
 export async function fetchComments(postId: string, limit = 10, offset = 0): Promise<ListCommentsResponse> {
     const res = await api.get(`/comments`, {
         params: { post_id: postId, limit, offset },

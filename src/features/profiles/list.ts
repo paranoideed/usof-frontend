@@ -7,7 +7,6 @@ export type SearchProfilesParams = {
     offset?:  number;
 };
 
-
 export async function list(params: SearchProfilesParams): Promise<ProfileList> {
     const { data } = await api.get(`/profiles`, {
         params: {
