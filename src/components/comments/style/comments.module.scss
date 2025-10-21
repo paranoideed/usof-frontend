@@ -1,6 +1,8 @@
 @use "../../../styles/variables" as *;
 
-// TODO FieldErr replyForm textarea formBar counter fieldErr list loading item header author time content actions linkBtn
+.root {
+  min-width: 0;        /* если .root в flex-контейнере — обязательно */
+}
 
 .textarea {
   width: 100%;
@@ -36,13 +38,17 @@
 }
 
 .list {
+  margin: 0;
+  padding: 0;     /* обязательно! иначе у <ul> будет дефолтный padding-left */
+  list-style: none;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden; /* ← отрезаем любые артефакты */
 }
+
 
 .item {
   padding: 10px 12px;

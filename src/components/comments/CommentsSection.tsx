@@ -12,29 +12,49 @@ import type { Comment } from "@features/comments/types";
 
 import s from "./CommentsSection.module.scss";
 
-type Props = { postId: string };
+/** ====== Reply Context (управляет док-композером) ====== */
+type ReplyTarget = {
+    postId: string;
+    parent: Comment;
+    onCreated?: (c: Comment) => void; // колбек, чтобы ветка родителя обновилась локально
+} | null;
+
+type ReplyCtx = {
+    target: ReplyTarget;
+    open: (t: ReplyTarget) => void;
+    close: () => void;
+};
+
+export const ReplyContext = React.createContext<ReplyCtx>({
+    target: null,
+    open: () => {},
+    close: () => {},
+});
 
 const ContentSchema = z.string().min(1, "Пустой комментарий").max(1000, "Слишком длинно");
 const PAGE_SIZE = 10;
+
+type Props = { postId: string };
 
 export default function CommentsSection({ postId }: Props) {
     const [items, setItems] = React.useState<Comment[]>([]);
     const [loading, setLoading] = React.useState(true);
     const [err, setErr] = React.useState<string | null>(null);
 
-    const [value, setValue] = React.useState("");
-    const [posting, setPosting] = React.useState(false);
-    const [fieldErr, setFieldErr] = React.useState<string | null>(null);
-
     const [offset, setOffset] = React.useState(0);
     const [total, setTotal] = React.useState<number | null>(null);
     const [loadingMore, setLoadingMore] = React.useState(false);
 
+    // ==== reply dock state ====
+    const [replyTarget, setReplyTarget] = React.useState<ReplyTarget>(null);
+    const [replyValue, setReplyValue] = React.useState("");
+    const [replyErr, setReplyErr] = React.useState<string | null>(null);
+    const [posting, setPosting] = React.useState(false);
+
     const hasMore = total !== null
         ? items.length < total
-        : items.length % PAGE_SIZE === 0 && items.length !== 0; // эвристика если total нет
+        : items.length % PAGE_SIZE === 0 && items.length !== 0;
 
-    // начальная загрузка
     React.useEffect(() => {
         let ignore = false;
         setLoading(true); setErr(null); setItems([]); setOffset(0); setTotal(null);
@@ -52,6 +72,7 @@ export default function CommentsSection({ postId }: Props) {
                 if (!ignore) setLoading(false);
             }
         })();
+
         return () => { ignore = true; };
     }, [postId]);
 
@@ -66,7 +87,148 @@ export default function CommentsSection({ postId }: Props) {
         } finally { setLoadingMore(false); }
     };
 
-    // отправка нового коммента
+    // ==== reply dock actions ====
+    const openReply: ReplyCtx["open"] = (t) => {
+        if (!t) return;
+        setReplyTarget(t);
+        setReplyErr(null);
+        setReplyValue("");
+    };
+    const closeReply = () => {
+        setReplyTarget(null);
+        setReplyErr(null);
+        setReplyValue("");
+    };
+
+    const submitReply = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!replyTarget) return;
+
+        setReplyErr(null);
+        const parsed = ContentSchema.safeParse(replyValue.trim());
+        if (!parsed.success) {
+            setReplyErr(parsed.error.issues[0]?.message ?? "Неверный текст");
+            return;
+        }
+
+        const authorId = getCurrentUserId();
+        if (!authorId) { setReplyErr("Нужно войти, чтобы отвечать"); return; }
+
+        setPosting(true);
+        try {
+            const created = await createComment({
+                post_id: replyTarget.postId,
+                author_id: authorId,
+                parent_id: replyTarget.parent.data.id,
+                content: parsed.data,
+            });
+
+            // сообщим родительской ветке — она локально добавит ответ + инкрементит счётчик
+            replyTarget.onCreated?.(created);
+
+            closeReply();
+        } catch (e: any) {
+            setReplyErr(e?.response?.data?.error ?? e?.message ?? "Не удалось отправить ответ");
+        } finally {
+            setPosting(false);
+        }
+    };
+
+    return (
+        <ReplyContext.Provider value={{ target: replyTarget, open: openReply, close: closeReply }}>
+            <div className={s.root}>
+                <h3 className={s.title}>Comments</h3>
+
+                {/* Форма нового корневого комментария остаётся как раньше */}
+                <RootComposer
+                    postId={postId}
+                    onCreated={(created) => {
+                        setItems((prev) => [created, ...prev]);
+                        setTotal((t) => (typeof t === "number" ? t + 1 : t));
+                    }}
+                />
+
+                {loading ? (
+                    <div className={s.loading}>Loading…</div>
+                ) : err ? (
+                    <div className={s.error}>Error: {err}</div>
+                ) : items.length === 0 ? (
+                    <div className={s.empty}>No comments</div>
+                ) : (
+                    <>
+                        <ul className={s.list}>
+                            {items.map((c) => (
+                                <CommentThread
+                                    key={c.data.id}
+                                    postId={postId}
+                                    comment={c}
+                                    replies={c.data.replies_count}
+                                    onDeleted={(id) => {
+                                        setItems((prev) => prev.filter((x) => x.data.id !== id));
+                                        setTotal((t) => (typeof t === "number" ? Math.max(0, t - 1) : t));
+                                    }}
+                                />
+                            ))}
+                        </ul>
+
+                        {hasMore && (
+                            <div className={s.moreWrap}>
+                                <div>
+                                    <Button onClick={loadMore} disabled={loadingMore}>
+                                        {loadingMore ? "Loading…" : "More"}
+                                    </Button>
+                                </div>
+                                {typeof total === "number" && (
+                                    <span className={s.totalHint}>
+                    Показано {items.length} из {total}
+                  </span>
+                                )}
+                            </div>
+                        )}
+                    </>
+                )}
+
+                {/* ==== DOCK REPLY COMPOSER ==== */}
+                {replyTarget && (
+                    <form className={s.replyDock} onSubmit={submitReply}>
+                        <div className={s.replyDockHeader}>
+              <span className={s.replyDockTitle}>
+                Replying to <strong>@{replyTarget.parent.data.author_username}</strong>
+              </span>
+                            <button type="button" className={s.replyDockClose} onClick={closeReply} aria-label="Close reply">
+                                ✕
+                            </button>
+                        </div>
+                        <textarea
+                            className={s.textarea}
+                            value={replyValue}
+                            onChange={(e) => setReplyValue(e.currentTarget.value)}
+                            placeholder="Write your reply…"
+                            maxLength={1000}
+                            rows={3}
+                        />
+                        <div className={s.formBar}>
+                            <span className={s.counter}>{replyValue.length}/1000</span>
+                            <div>
+                                <Button className={s.submit} disabled={posting || replyValue.trim().length === 0}>
+                                    {posting ? "Sending…" : "Send"}
+                                </Button>
+                            </div>
+                        </div>
+                        {replyErr && <div className={s.fieldErr}>{replyErr}</div>}
+                    </form>
+                )}
+            </div>
+        </ReplyContext.Provider>
+    );
+}
+
+/** Отдельная форма для корневых комментариев (осталась вверху, как раньше) */
+function RootComposer({ postId, onCreated }: { postId: string; onCreated: (c: Comment) => void }) {
+    const [value, setValue] = React.useState("");
+    const [posting, setPosting] = React.useState(false);
+    const [fieldErr, setFieldErr] = React.useState<string | null>(null);
+
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setFieldErr(null);
@@ -76,12 +238,8 @@ export default function CommentsSection({ postId }: Props) {
             setFieldErr(parsed.error.issues[0]?.message ?? "Неверный текст");
             return;
         }
-
         const authorId = getCurrentUserId();
-        if (!authorId) {
-            setFieldErr("Нужно войти, чтобы комментировать");
-            return;
-        }
+        if (!authorId) { setFieldErr("Нужно войти, чтобы комментировать"); return; }
 
         setPosting(true);
         try {
@@ -91,10 +249,7 @@ export default function CommentsSection({ postId }: Props) {
                 parent_id: null,
                 content: parsed.data,
             });
-            // добавим в начало списка
-            setItems((prev) => [created, ...prev]);
-            // если есть total — увеличим
-            setTotal((t) => (typeof t === "number" ? t + 1 : t));
+            onCreated(created);
             setValue("");
         } catch (e: any) {
             setFieldErr(e?.response?.data?.error ?? e?.message ?? "Не удалось отправить комментарий");
@@ -104,68 +259,24 @@ export default function CommentsSection({ postId }: Props) {
     };
 
     return (
-        <div className={s.root}>
-            <h3 className={s.title}>Comments</h3>
-
-            <form className={s.form} onSubmit={onSubmit}>
-        <textarea
-            className={s.textarea}
-            value={value}
-            onChange={(e) => setValue(e.currentTarget.value)}
-            placeholder="Write comment…"
-            maxLength={1000}
-            rows={4}
-        />
-                <div className={s.formBar}>
-                    <span className={s.counter}>{value.length}/1000</span>
-                    <div>
-                        <Button className={s.submit} disabled={posting || value.trim().length === 0}>
-                            {posting ? "Sending…" : "Send"}
-                        </Button>
-                    </div>
+        <form className={s.form} onSubmit={onSubmit}>
+      <textarea
+          className={s.textarea}
+          value={value}
+          onChange={(e) => setValue(e.currentTarget.value)}
+          placeholder="Write comment…"
+          maxLength={1000}
+          rows={4}
+      />
+            <div className={s.formBar}>
+                <span className={s.counter}>{value.length}/1000</span>
+                <div>
+                    <Button className={s.submit} disabled={posting || value.trim().length === 0}>
+                        {posting ? "Sending…" : "Send"}
+                    </Button>
                 </div>
-                {fieldErr && <div className={s.fieldErr}>{fieldErr}</div>}
-            </form>
-
-            {loading ? (
-                <div className={s.loading}>Loading…</div>
-            ) : err ? (
-                <div className={s.error}>Error: {err}</div>
-            ) : items.length === 0 ? (
-                <div className={s.empty}>No comments</div>
-            ) : (
-                <>
-                    <ul className={s.list}>
-                        {items.map((c) => (
-                            <CommentThread
-                                key={c.data.id}
-                                postId={postId}
-                                comment={c}
-                                replies={c.data.replies_count}
-                                onDeleted={(id) => {
-                                    setItems((prev) => prev.filter((x) => x.data.id !== id));
-                                    setTotal((t) => (typeof t === "number" ? Math.max(0, t - 1) : t));
-                                }}
-                            />
-                        ))}
-                    </ul>
-
-                    {hasMore && (
-                        <div className={s.moreWrap}>
-                            <div>
-                                <Button onClick={loadMore} disabled={loadingMore}>
-                                    {loadingMore ? "Loading…" : "More"}
-                                </Button>
-                            </div>
-                            {typeof total === "number" && (
-                                <span className={s.totalHint}>
-                                    Показано {items.length} из {total}
-                                </span>
-                            )}
-                        </div>
-                    )}
-                </>
-            )}
-        </div>
+            </div>
+            {fieldErr && <div className={s.fieldErr}>{fieldErr}</div>}
+        </form>
     );
 }
