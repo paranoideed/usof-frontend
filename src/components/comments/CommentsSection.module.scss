@@ -1,0 +1,77 @@
+@use "../../styles/variables" as *;
+@import "./style/comments.module.scss";
+
+.root {
+  margin-top: 24px;
+}
+
+.title {
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 0;
+  background: $main;
+  border: 1px solid $main-border;
+  color: $text-primary;
+}
+
+.formBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.counter {
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+.submit {
+  padding: 8px 14px;
+  border-radius: 8px;
+}
+
+.fieldErr {
+  color: #e33;
+  font-size: 13px;
+}
+
+.loading,
+.error,
+.empty {
+  opacity: 0.8;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.moreWrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.totalHint {
+  opacity: 0.7;
+  font-size: 12px;
+}

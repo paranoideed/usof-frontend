@@ -1,4 +1,5 @@
-import {api} from "@features/client.ts";
+import api from "@features/api.ts";
+
 import type {Comment} from "@features/comments/types.ts";
 import type {LikeType} from "@features/likes/types.ts";
 

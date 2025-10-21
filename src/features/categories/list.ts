@@ -1,4 +1,5 @@
-import {api} from "@features/client.ts";
+import api from "@features/api.ts";
+
 import type {ListCategories} from "@features/categories/types.ts";
 
 export async function listCategories({limit = 100, offset = 0}): Promise<ListCategories> {

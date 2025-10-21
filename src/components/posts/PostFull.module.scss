@@ -77,10 +77,12 @@
 }
 
 .category {
-  background: #333;
-  border-radius: 8px;
-  padding: 0.2rem 0.6rem;
-  margin-right: 0.3rem;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .likes {

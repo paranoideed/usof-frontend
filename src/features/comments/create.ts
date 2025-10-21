@@ -1,4 +1,5 @@
-import {api} from "@features/client.ts";
+import api from "@features/api.ts";
+
 import type {Comment, CreateCommentInput} from "@features/comments/types.ts";
 
 export async function createComment(payload: CreateCommentInput): Promise<Comment> {

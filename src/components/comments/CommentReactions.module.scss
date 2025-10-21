@@ -1,0 +1,9 @@
+@use "../../styles/variables" as *;
+@import "./style/comments.module.scss";
+
+.reactions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}

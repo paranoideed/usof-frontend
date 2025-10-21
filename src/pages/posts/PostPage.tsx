@@ -1,11 +1,15 @@
 import * as React from "react";
-import {useNavigate, useParams} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+
 import NavBar from "@/components/ui/NavBar";
-import { api } from "@/features/client";
-import s from "./PostPage.module.scss";
 import PostFull from "@components/posts/PostFull";
-import type { Post } from "@/features/posts/posts";
 import CommentsSection from "@components/comments/CommentsSection.tsx";
+
+import api from"@features/api.ts";
+
+import type { Post } from "@/features/posts/posts";
+
+import s from "./PostPage.module.scss";
 
 export default function PostPage() {
     const navigate = useNavigate();

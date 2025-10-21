@@ -1,4 +1,5 @@
 import * as React from "react";
+
 import s from "./DislikeButton.module.scss";
 
 type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {

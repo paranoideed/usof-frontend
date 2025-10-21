@@ -1,16 +1,19 @@
 import * as React from "react";
+import { useSearchParams } from "react-router-dom";
 
-import NavBar from "@/components/ui/NavBar";
-import PostSmall from "@/components/posts/PostSmall";
 import usePostsFeed from "./hooks/usePostsFeed";
 
-import Fab from "@components/ui/Fab.tsx";
-import CreatePostModal from "@pages/posts/CreatePostModal.tsx";
+import Fab from "@components/ui/Fab";
+import Button from "@components/ui/Button";
+import NavBar from "@/components/ui/NavBar";
+import PostSmall from "@/components/posts/PostSmall";
+import CreatePostModal from "@pages/posts/CreatePostModal";
+
+import api from "@features/api";
+
+import type { ListPostsParams } from "@features/posts/fetch";
 
 import s from "@/pages/posts/PostsFeedPage.module.scss";
-import Button from "@components/ui/Button.tsx";
-import { api } from "@/features/client";
-import type {ListPostsParams} from "@features/posts/fetch.ts";
 
 type CategoryRow = { id: string; title: string };
 
@@ -26,7 +29,6 @@ function useCategories() {
             setErr(null);
             try {
                 const r = await api.get("/categories");
-                // если у тебя JSON:API — тут распарси по-своему, ниже — примитив
                 setItems(r.data?.data ?? r.data ?? []);
             } catch (e: any) {
                 setErr(e?.message ?? "Failed to load categories");
@@ -41,10 +43,27 @@ function useCategories() {
 }
 
 export default function PostsFeedPage() {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const initialCat = searchParams.get("category") ?? "";
+
     const [q, setQ] = React.useState("");
     const [orderBy, setOrderBy] = React.useState<"rating" | "created_at" | "likes" | "dislikes">("rating");
     const [createOpen, setCreateOpen] = React.useState(false);
-    const [categoryId, setCategoryId] = React.useState<string>("");
+    const [categoryId, setCategoryId] = React.useState<string>(initialCat);
+
+    // если пользователь пришёл по "назад/вперёд" и поменялись searchParams — подтянуть новое значение
+    React.useEffect(() => {
+        const urlCat = searchParams.get("category") ?? "";
+        setCategoryId((prev) => (prev === urlCat ? prev : urlCat));
+    }, [searchParams]);
+
+    // при изменении categoryId — обновляем URL (без перезагрузки)
+    React.useEffect(() => {
+        const next = new URLSearchParams(searchParams);
+        if (categoryId) next.set("category", categoryId);
+        else next.delete("category");
+        setSearchParams(next, { replace: true });
+    }, [categoryId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const { items: categories, loading: catLoading, err: catErr } = useCategories();
 

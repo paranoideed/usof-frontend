@@ -1,4 +1,4 @@
-import {api} from "../client.ts";
+import api from "@features/api.ts";
 
 export type UserToken = { token: string };
 
@@ -11,7 +11,7 @@ function isEmail(value: string) {
     return /\S+@\S+\.\S+/.test(value);
 }
 
-export async function login(input: LoginInput): Promise<UserToken> {
+export default async function login(input: LoginInput): Promise<UserToken> {
     const { identifier, password } = input;
 
     const payload: Record<string, string> = { password };

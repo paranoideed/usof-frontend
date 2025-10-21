@@ -1,0 +1,53 @@
+@use "../../styles/variables" as *;
+@import "style/profiles.module.scss";
+
+.rootForSearch {
+  display: flex;
+  min-height: 100vh;
+
+  align-items: flex-start;
+  justify-content: center;
+
+  padding-top: calc(var(--nav-h) + 16px);
+  font-size: var(--font-base);
+}
+
+.profilesList {
+  display: flex;
+  flex-direction: column;
+
+  background: $main;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.profilesListItem {
+  background: $bg;
+}
+
+.nothingFound {
+  text-align: center;
+  color: $brand;
+  font-size: 18px;
+}
+
+.searchProfileInput {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: none;
+  outline: none;
+  background: $input-bg;
+
+  color: #fff;
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  &:focus {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 2px $brand-hover
+  }
+}

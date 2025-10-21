@@ -1,4 +1,5 @@
-import { api } from "../client";
+import api from"../api.ts";
+
 import type {Profile, ProfileList} from "./types.ts";
 
 export type SearchProfilesParams = {

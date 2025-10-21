@@ -1,7 +1,7 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-export const api = axios.create({
+const api = axios.create({
     baseURL: '/api',
     withCredentials: true,
 });
@@ -14,3 +14,5 @@ api.interceptors.request.use((config) => {
     }
     return config;
 });
+
+export default api;

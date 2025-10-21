@@ -1,25 +1,25 @@
 import * as React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, createSearchParams } from "react-router-dom";
 
-import {
-    type Post,
-} from "@/features/posts/posts";
-
-import { getCurrentUserId, getCurrentUserRole } from "@features/auth/sessions.ts";
-import DEFAULT_PIC from "@features/ui.ts";
-
-import s from "@components/posts/PostFull.module.scss";
+import Button from "@components/ui/Button.tsx";
 import LikeButton from "@components/ui/LikeButton.tsx";
 import DislikeButton from "@components/ui/DislikeButton.tsx";
 import RatingPost from "@components/ui/RatingPost.tsx";
-import Button from "@components/ui/Button.tsx";
 import MarkdownView from "@components/ui/MarkdownView";
+
 import EditPostModal from "@pages/posts/EditPostModal.tsx";
-import {type MyReaction, parseMyReaction} from "@features/likes/types.ts";
-import {getPost} from "@features/posts/get.ts";
-import {likePost, unlikePost} from "@features/likes/posts.ts";
-import {deletePost} from "@features/posts/delete.ts";
-import {updatePostStatus} from "@features/posts/update.ts";
+
+import { getPost } from "@features/posts/get.ts";
+import { deletePost } from "@features/posts/delete.ts";
+import { updatePostStatus } from "@features/posts/update.ts";
+import { likePost, unlikePost} from "@features/likes/posts.ts";
+import { getCurrentUserId, getCurrentUserRole } from "@features/auth/sessions.ts";
+
+import {type MyReaction, parseMyReaction } from "@features/likes/types.ts";
+import { type Post } from "@/features/posts/posts";
+
+import DEFAULT_PIC from "@features/ui.ts";
+import s from "@components/posts/PostFull.module.scss";
 
 export default function PostFull(props: Post) {
     const navigate = useNavigate();
@@ -82,13 +82,13 @@ export default function PostFull(props: Post) {
 
     async function onDelete() {
         if (!canDelete || busy) return;
-        if (!confirm("Удалить пост?")) return;
+        if (!confirm("Delete post?")) return;
         setBusy(true);
         try {
             await deletePost(post.id);
             navigate("/posts");
         } catch {
-            alert("Не удалось удалить пост");
+            alert("Cannot delete post");
         } finally {
             setBusy(false);
         }
@@ -103,11 +103,18 @@ export default function PostFull(props: Post) {
             await updatePostStatus(post.id, nextStatus);
         } catch {
             setPost((p) => ({ ...p, status: prev })); // откат
-            alert("Не удалось изменить статус");
+            alert("Cannot update post status");
         } finally {
             setBusy(false);
         }
     }
+
+    const goToCategory = (id: string) => {
+        navigate({
+            pathname: "/posts",
+            search: `?${createSearchParams({ category: id })}`,
+        });
+    };
 
     return (
         <div className={s.postCard}>
@@ -131,16 +138,18 @@ export default function PostFull(props: Post) {
                     {cats?.length ? (
                         <div className={s.categories}>
                             {cats.map((c) => (
-                                <Link
+                                <button
                                     key={c.id}
-                                    to={`/categories/${c.id}`}
+                                    type="button"
                                     className={s.category}
                                     title={c.description || c.title}
-                                    onClick={(e) => e.stopPropagation()}
-                                    onKeyDown={(e) => e.stopPropagation()}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        goToCategory(c.id);
+                                    }}
                                 >
                                     #{c.title}
-                                </Link>
+                                </button>
                             ))}
                         </div>
                     ) : null}
@@ -179,7 +188,7 @@ export default function PostFull(props: Post) {
 
                 <div className={s.BottomGroupBtn}>
                     {canEdit && (
-                        <Button onClick={() => setEditOpen(true)} title="Редактировать пост">
+                        <Button onClick={() => setEditOpen(true)} title="Update post">
                             Edit
                         </Button>
                     )}
@@ -189,7 +198,7 @@ export default function PostFull(props: Post) {
                         </Button>
                     )}
                     {canDelete && (
-                        <Button onClick={onDelete} disabled={busy} title="Удалить пост">
+                        <Button onClick={onDelete} disabled={busy} title="Delete post">
                             Delete
                         </Button>
                     )}

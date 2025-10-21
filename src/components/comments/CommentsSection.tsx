@@ -1,12 +1,16 @@
 import * as React from "react";
 import { z } from "zod";
-import { getCurrentUserId } from "@/features/auth/sessions";
-import s from "./style/comments.module.scss";
-import CommentThread from "@components/comments/CommentThread.tsx";
-import {fetchCommentsByParent} from "@features/comments/fetched.ts";
-import {createComment} from "@features/comments/create.ts";
-import type { Comment } from "@features/comments/types";
+
 import Button from "@components/ui/Button.tsx";
+import CommentThread from "@components/comments/CommentThread.tsx";
+
+import { createComment } from "@features/comments/create.ts";
+import { getCurrentUserId } from "@/features/auth/sessions";
+import { fetchCommentsByParent } from "@features/comments/fetched.ts";
+
+import type { Comment } from "@features/comments/types";
+
+import s from "./CommentsSection.module.scss";
 
 type Props = { postId: string };
 
@@ -123,7 +127,6 @@ export default function CommentsSection({ postId }: Props) {
                 {fieldErr && <div className={s.fieldErr}>{fieldErr}</div>}
             </form>
 
-            {/* список */}
             {loading ? (
                 <div className={s.loading}>Loading…</div>
             ) : err ? (
@@ -138,6 +141,7 @@ export default function CommentsSection({ postId }: Props) {
                                 key={c.data.id}
                                 postId={postId}
                                 comment={c}
+                                replies={c.data.replies_count}
                                 onDeleted={(id) => {
                                     setItems((prev) => prev.filter((x) => x.data.id !== id));
                                     setTotal((t) => (typeof t === "number" ? Math.max(0, t - 1) : t));

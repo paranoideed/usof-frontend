@@ -1,4 +1,4 @@
-import {api} from "../client.ts";
+import api from "@/features/api.ts";
 
 export type RegisterInput = {
     username: string;

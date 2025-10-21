@@ -11,10 +11,11 @@ import { FormError, FormOk } from "@/components/ui/FormAlert";
 import useProfile from "./hooks/useProfile.ts";
 
 import logout from "@/features/auth/logout";
+import updateMe from "@features/profiles/update.ts";
+
 import type {MeResponse} from "@features/profiles/get.ts";
 
-import s from "./styles/profiles.module.scss";
-import {updateMe} from "@features/profiles/update.ts";
+import s from "./MyProfilePage.module.scss";
 
 export default function MyProfilePage() {
     const { data, loading, error, status, setData } = useProfile();

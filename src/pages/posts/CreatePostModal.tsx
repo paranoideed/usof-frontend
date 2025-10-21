@@ -1,11 +1,15 @@
-import * as React from "react";
-import s from "./CreatePostModal.module.scss";
-import { getCurrentUserId } from "@features/auth/sessions.ts";
-import Button from "@components/ui/Button.tsx";
+import * as React from "react"
 import clsx from "clsx";
-import {createPost} from "@features/posts/create.ts";
+
+import Button from "@components/ui/Button.tsx";
+
+import { createPost } from "@features/posts/create.ts";
+import { listCategories } from "@features/categories/list.ts";
+import { getCurrentUserId } from "@features/auth/sessions.ts";
+
 import type {Category, ListCategories} from "@features/categories/types.ts";
-import {listCategories} from "@features/categories/list.ts";
+
+import s from "./CreatePostModal.module.scss";
 
 type Props = { open: boolean; onClose: () => void; onCreated?: () => void };
 type FieldErrors = { common?: string; title?: string; content?: string; categories?: string };

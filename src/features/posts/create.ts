@@ -1,4 +1,5 @@
-import {api} from "@features/client.ts";
+import api from "@features/api.ts";
+
 import type {Post} from "@features/posts/posts.ts";
 
 export type CreatePostInput = {

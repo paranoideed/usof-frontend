@@ -1,0 +1,34 @@
+@use "../../../styles/variables" as *;
+@use "sass:color";
+
+:root {
+  --space:      clamp(12px, 1.6vmin, 20px);
+  --radius:     16px;
+  --card-w:     min(100%, 920px);
+
+  --avatar:     clamp(120px, 18vmin, 180px);
+  --font-base:  clamp(14px, 1.8vmin, 18px);
+  --font-title: clamp(22px, 3.2vmin, 32px);
+}
+
+.root {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-base);
+}
+
+.card {
+  width: 100%;
+  max-width: var(--card-w);
+  background: $main;
+  border: $main-border;
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 1.5);
+
+  box-shadow: 0 4px 18px rgba(0,0,0,.06);
+
+  container-type: inline-size;
+}
+

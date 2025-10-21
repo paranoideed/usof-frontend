@@ -1,4 +1,4 @@
-import { api } from "../client";
+import api from"../api.ts";
 
 export type UpdateMeInput = {
     username?: string;
@@ -11,7 +11,7 @@ export type UpdateMeResponse = {
     pseudonym: string | null;
 };
 
-export async function updateMe(input: UpdateMeInput): Promise<UpdateMeResponse> {
+export default async function updateMe(input: UpdateMeInput): Promise<UpdateMeResponse> {
     try {
         const { data } = await api.post("/profiles/me", input);
         return data;

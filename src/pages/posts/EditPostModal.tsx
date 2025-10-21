@@ -1,11 +1,15 @@
 import * as React from "react";
-import s from "./CreatePostModal.module.scss"; // переиспользуем те же стили
-import Button from "@components/ui/Button.tsx";
 import clsx from "clsx";
-import type {Category} from "@features/categories/types.ts";
-import type {Post} from "@features/posts/posts.ts";
-import {listCategories} from "@features/categories/list.ts";
-import {updatePost} from "@features/posts/update.ts";
+
+import Button from "@components/ui/Button.tsx";
+
+import { updatePost } from "@features/posts/update.ts";
+import { listCategories } from "@features/categories/list.ts";
+
+import type { Post } from "@features/posts/posts.ts";
+import type { Category } from "@features/categories/types.ts";
+
+import s from "./CreatePostModal.module.scss";
 
 type Props = {
     open: boolean;

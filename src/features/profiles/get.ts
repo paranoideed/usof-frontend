@@ -1,4 +1,5 @@
-import { api } from "../client";
+import api from"../api.ts";
+
 import type {Profile} from "@features/profiles/types.ts";
 
 export type MeResponse = {

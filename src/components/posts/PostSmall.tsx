@@ -1,10 +1,11 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import type { Post } from "@/features/posts/posts";
-import DEFAULT_PIC from "@features/ui";
 import RatingPost from "@components/ui/RatingPost";
 
+import type { Post } from "@/features/posts/posts";
+
+import DEFAULT_PIC from "@features/ui";
 import s from "./PostSmall.module.scss";
 
 type Props = {

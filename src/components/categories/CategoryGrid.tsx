@@ -1,5 +1,7 @@
-import type {Category} from "@/features/categories/categories";
-import CategoryCard from "./CategoryCard";
+import CategoryCard from "@/components/categories/CategoryCard";
+
+import type { Category } from "@/features/categories/types";
+
 import s from "./CategoryGrid.module.scss";
 
 

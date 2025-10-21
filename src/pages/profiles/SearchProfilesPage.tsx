@@ -6,7 +6,7 @@ import { FormError } from "@/components/ui/FormAlert";
 
 import useProfilesSearch from "./hooks/useProfilesSearch";
 
-import s from "./styles/profiles.module.scss";
+import s from "./SearchProfilesPage.module.scss";
 
 export default function SearchProfilesPage() {
     const { q, setQ, data, loading, err, hasMore, limit, offset, setOffset } = useProfilesSearch("", 10);

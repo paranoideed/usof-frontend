@@ -1,5 +1,6 @@
+import api from "@features/api.ts";
+
 import type {Category} from "@features/categories/types.ts";
-import {api} from "@features/client.ts";
 
 export type UpdateCategoryInput = {
     id:          string;

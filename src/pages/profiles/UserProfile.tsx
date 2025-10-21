@@ -6,7 +6,7 @@ import { FormError } from "@/components/ui/FormAlert";
 
 import useProfileBy from "./hooks/useProfileBy";
 
-import s from "./styles/profiles.module.scss";
+import s from "./UserProfile.module.scss";
 
 export default function UserProfilePage() {
     const { user_id, username } = useParams<{ user_id?: string; username?: string }>();

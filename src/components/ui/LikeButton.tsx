@@ -1,4 +1,5 @@
 import * as React from "react";
+
 import s from "./LikeButton.module.scss";
 
 type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {

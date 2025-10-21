@@ -3,14 +3,24 @@
 .card {
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Разделяем контент и кнопки по вертикали */
+  justify-content: space-between;
+  background: $main;
+  transition: box-shadow 0.2s ease 0s;
+
   gap: 8px;
   padding: 14px;
+
   border: 1px solid $main-border;
   border-radius: 12px;
-  background: $main;
-  height: 100%; /* Если карточки в сетке — чтобы они выравнивались */
-  transition: box-shadow 0.2s ease 0s;
+
+  max-width: 600px;
+  min-width: 200px;
+
+  max-height: 400px;
+  min-height: 125px;
+
+  width: 14vw;
+  height: 16vh;
 
   &:hover {
     background: $second-main;
@@ -35,12 +45,22 @@
   margin: 0;
   font-size: 16px;
   font-weight: 600;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .desc {
   margin: 0;
   color: #bdbdbd;
   line-height: 1.35;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;     /* показывать максимум 3 строки */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .actions {

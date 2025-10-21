@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { api } from "../client";
+import api from "@/features/api.ts";
 
 export default async function logout(): Promise<void> {
     try {

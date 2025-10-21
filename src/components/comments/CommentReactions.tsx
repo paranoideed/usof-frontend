@@ -1,10 +1,14 @@
 import * as React from "react";
+
 import LikeButton from "@components/ui/LikeButton";
 import DislikeButton from "@components/ui/DislikeButton";
-import s from "./style/comments.module.scss";
-import {likeComment, unlikeComment} from "@features/likes/comments.ts";
+
 import {getComment} from "@features/comments/get.ts";
-import {type LikeType, type MyReaction, parseMyReaction} from "@features/likes/types.ts";
+import {likeComment, unlikeComment} from "@features/likes/comments.ts";
+
+import {parseMyReaction, type LikeType, type MyReaction} from "@features/likes/types.ts";
+
+import s from "./CommentReactions.module.scss";
 
 type Props = {
     commentId: string;

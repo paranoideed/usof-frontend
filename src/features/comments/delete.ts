@@ -1,4 +1,5 @@
-import { api } from "@/features/client";
+import api from"@features/api.ts";
+
 import type {UserRole} from "@features/auth/sessions.ts";
 import type { Comment } from "@/features/comments/types";
 

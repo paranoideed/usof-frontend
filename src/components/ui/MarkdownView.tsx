@@ -3,7 +3,7 @@ import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import rehypeSanitize from "rehype-sanitize";
 
-import "highlight.js/styles/github-dark.css";
+import "./MarkdownView.module.scss"
 
 type Props = { children: string };
 

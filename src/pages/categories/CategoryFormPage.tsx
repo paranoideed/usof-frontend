@@ -1,10 +1,12 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
+
 import { isAdmin } from "@/features/auth/sessions";
+import { updateCategory } from "@features/categories/update.ts";
+import { createCategory } from "@features/categories/create.ts";
+import { listCategories } from "@features/categories/list.ts";
+
 import s from "./CategoryFormPage.module.scss";
-import {updateCategory} from "@features/categories/update.ts";
-import {createCategory} from "@features/categories/create.ts";
-import {listCategories} from "@features/categories/list.ts";
 
 export default function CategoryFormPage() {
     const { id } = useParams();
@@ -20,7 +22,7 @@ export default function CategoryFormPage() {
     React.useEffect(() => {
         if (!editing) return;
         setLoading(true);
-        listCategories(100, 0)
+        listCategories({ limit: 1000, offset: 0 })
             .then((res) => {
                 const found = res.data.find((x) => x.id === id);
                 if (found) {

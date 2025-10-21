@@ -1,17 +1,18 @@
 import * as React from "react";
 import { z } from "zod";
 
-import { getCurrentUserId, getCurrentUserRole } from "@/features/auth/sessions";
-import s from "./style/comments.module.scss";
-
-import CommentReactions from "@/components/comments/CommentReactions";
-import { fetchCommentsByParent } from "@/features/comments/fetched";
-import { createComment } from "@/features/comments/create";
-import {canDeleteComment, deleteComment} from "@/features/comments/delete";
-
-import { parseMyReaction } from "@/features/likes/types"; // как у тебя
-import type { Comment } from "@/features/comments/types";
 import Button from "@components/ui/Button.tsx";
+import CommentReactions from "@/components/comments/CommentReactions";
+
+import { createComment } from "@/features/comments/create";
+import { parseMyReaction } from "@/features/likes/types";
+import { fetchCommentsByParent } from "@/features/comments/fetched";
+import { canDeleteComment, deleteComment } from "@/features/comments/delete";
+import { getCurrentUserId, getCurrentUserRole } from "@/features/auth/sessions";
+
+import type { Comment } from "@/features/comments/types";
+
+import s from "./CommentThread.module.scss";
 
 const ContentSchema = z.string().min(1, "Пустой комментарий").max(1000, "Слишком длинно");
 const PAGE_SIZE = 10;
@@ -20,11 +21,12 @@ type Props = {
     postId: string;
     comment: Comment;            // корневой комментарий ветки
     depth?: number;
+    replies: number;         // количество ответов (для показа кнопки загрузки)
     onLocalReplyAdded?: (c: Comment) => void;
     onDeleted?: (id: string) => void;    // сообщим родителю, если удалили корневой
 };
 
-export default function CommentThread({ postId, comment, depth = 0, onDeleted }: Props) {
+export default function CommentThread({ postId, comment, depth = 0, replies, onDeleted }: Props) {
     const [showReply, setShowReply] = React.useState(false);      // форма ответа
     const [showReplies, setShowReplies] = React.useState(false);  // список ответов
 
@@ -32,7 +34,7 @@ export default function CommentThread({ postId, comment, depth = 0, onDeleted }:
     const [replyErr, setReplyErr] = React.useState<string | null>(null);
     const [posting, setPosting] = React.useState(false);
 
-    const [replies, setReplies] = React.useState<Comment[]>([]);
+    const [repliesState, setReplies] = React.useState<Comment[]>([]);
     const [rOffset, setROffset] = React.useState(0);
     const [rTotal, setRTotal] = React.useState<number | null>(null);
     const [loadingReplies, setLoadingReplies] = React.useState(false);
@@ -44,20 +46,31 @@ export default function CommentThread({ postId, comment, depth = 0, onDeleted }:
     const meId = getCurrentUserId();
     const role = getCurrentUserRole();
 
-    const canDeleteRoot = canDeleteComment(comment, meId, role);
-    const hasReplies = (rTotal ?? 0) > 0 || replies.length > 0;
+    const [repliesCount, setRepliesCount] = React.useState<number>(replies ?? 0);
+    React.useEffect(() => {
+        setRepliesCount(replies ?? 0);
+    }, [replies]);
 
-    const hasMoreReplies = rTotal !== null
-        ? replies.length < rTotal
-        : replies.length !== 0 && replies.length % PAGE_SIZE === 0;
+    const canDeleteRoot = canDeleteComment(comment, meId, role);
+
+    const effectiveTotal = (typeof rTotal === "number" ? rTotal : repliesCount);
+    const hasReplies = effectiveTotal > 0;
+
+    const hasMoreReplies = typeof rTotal === "number"
+        ? repliesState.length < rTotal
+        : repliesState.length !== 0 && repliesState.length % PAGE_SIZE === 0;
 
     const ensureLoadReplies = async () => {
-        if (loadingReplies || replies.length > 0 || rOffset > 0) return;
+        if (loadingReplies || repliesState.length > 0 || rOffset > 0) return;
         setLoadingReplies(true);
         try {
             const res = await fetchCommentsByParent(postId, comment.data.id, PAGE_SIZE, 0);
             setReplies(res.data ?? []);
-            if (typeof res.total === "number") setRTotal(res.total);
+            if (typeof res.total === "number") {
+                setRTotal(res.total);
+            } else {
+                setRTotal((res.data ?? []).length);
+            }
             setROffset((res.offset ?? 0) + (res.limit ?? PAGE_SIZE));
         } finally {
             setLoadingReplies(false);
@@ -87,7 +100,9 @@ export default function CommentThread({ postId, comment, depth = 0, onDeleted }:
         }
     };
 
-    const labelRepliesBtn = showReplies ? "Hide answers " : "Show answers";
+    const labelRepliesBtn = showReplies
+        ? `Hide answers (${effectiveTotal})`
+        : `Show answers (${effectiveTotal})`;
 
     const submitReply = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -147,7 +162,6 @@ export default function CommentThread({ postId, comment, depth = 0, onDeleted }:
 
             <p className={s.content}>{comment.data.content}</p>
 
-
             <div className={s.btnFooter}>
                 <div>
                     <CommentReactions
@@ -158,30 +172,30 @@ export default function CommentThread({ postId, comment, depth = 0, onDeleted }:
                     />
                 </div>
                 <div className={s.actions}>
-                <div>
-                    <Button onClick={() => setShowReply((v) => !v)}>
-                        {showReply ? "Cansel" : "Answer"}
-                    </Button>
-                </div>
-                <div>
-                    {hasReplies && (
-                        <Button onClick={toggleReplies}>
-                            {labelRepliesBtn}
-                        </Button>
-                    )}
-                </div>
-                {canDeleteRoot && (
                     <div>
-                        <Button
-                            onClick={handleDeleteRoot}
-                            disabled={deleting}
-                            aria-label="Delete comment"
-                            title="Delete comment"
-                        >
-                            {deleting ? "Deleting…" : "Delete"}
+                        <Button onClick={() => setShowReply((v) => !v)}>
+                            {showReply ? "Cansel" : "Answer"}
                         </Button>
                     </div>
-                )}
+                    <div>
+                        {hasReplies && (
+                            <Button onClick={toggleReplies}>
+                                {labelRepliesBtn}
+                            </Button>
+                        )}
+                    </div>
+                    {canDeleteRoot && (
+                        <div>
+                            <Button
+                                onClick={handleDeleteRoot}
+                                disabled={deleting}
+                                aria-label="Delete comment"
+                                title="Delete comment"
+                            >
+                                {deleting ? "Deleting…" : "Delete"}
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -189,31 +203,34 @@ export default function CommentThread({ postId, comment, depth = 0, onDeleted }:
 
             {showReply && (
                 <form className={s.replyForm} onSubmit={submitReply}>
-          <textarea
-              className={s.textarea}
-              value={replyText}
-              onChange={(e) => setReplyText(e.currentTarget.value)}
-              placeholder="Your Answer…"
-              maxLength={1000}
-              rows={3}
-          />
-                    <div className={s.formBar}>
-                        <span className={s.counter}>{replyText.length}/1000</span>
-                        <button className={s.submit} disabled={posting || replyText.trim().length === 0}>
+                <textarea
+                    className={s.textarea}
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.currentTarget.value)}
+                    placeholder="Your Answer…"
+                    maxLength={1000}
+                    rows={3}
+                />
+                <div className={s.formBar}>
+                    <span className={s.counter}>
+                        {replyText.length}/1000
+                    </span>
+                    <div>
+                        <Button disabled={posting || replyText.trim().length === 0}>
                             {posting ? "Sending…" : "Send"}
-                        </button>
+                        </Button>
                     </div>
+                </div>
                     {replyErr && <div className={s.fieldErr}>{replyErr}</div>}
                 </form>
             )}
 
-            {/* список ответов */}
             {showReplies && (
                 <ul className={s.list} style={{ marginTop: 8 }}>
                     {loadingReplies ? (
                         <div className={s.loading}>Загрузка ответов…</div>
                     ) : (
-                        replies.map((r) => {
+                        repliesState.map((r) => {
                             const replyCanDelete = canDeleteComment(r, meId, role);
 
                             const deleteReply = async () => {
@@ -221,32 +238,37 @@ export default function CommentThread({ postId, comment, depth = 0, onDeleted }:
                                 try {
                                     await deleteComment(r.data.id);
                                     setReplies((prev) => prev.filter((x) => x.data.id !== r.data.id));
+                                    setRepliesCount((n) => Math.max(0, n - 1));
                                     setRTotal((t) => (typeof t === "number" ? Math.max(0, t - 1) : t));
                                 } catch {
-                                    //TODO: show error
+                                    // TODO: показать ошибку
                                 }
                             };
 
                             return (
                                 <li key={r.data.id} className={s.item} style={{ marginLeft: 16 }}>
+                                    {/* 🔹 ЭТОГО НЕ ХВАТАЛО */}
                                     <div className={s.header}>
                                         <span className={s.author}>@{r.data.author_username}</span>
-                                        <time className={s.time}>{new Date(r.data.created_at).toLocaleString()}</time>
+                                        <time className={s.time}>
+                                            {new Date(r.data.created_at).toLocaleString()}
+                                        </time>
                                     </div>
-                                    <p className={s.content}>{r.data.content}</p>
 
-                                    <CommentReactions
-                                        commentId={r.data.id}
-                                        initialLikes={r.data.likes}
-                                        initialDislikes={r.data.dislikes}
-                                        initialMyReaction={parseMyReaction(r.user_reaction)}
-                                    />
+                                    <p className={s.content}>{r.data.content}</p>
+                                    {/* 🔹 /ЭТОГО НЕ ХВАТАЛО */}
 
                                     <div className={s.actions}>
+                                        <CommentReactions
+                                            commentId={r.data.id}
+                                            initialLikes={r.data.likes}
+                                            initialDislikes={r.data.dislikes}
+                                            initialMyReaction={parseMyReaction(r.user_reaction)}
+                                        />
                                         {replyCanDelete && (
-                                            <button className={s.linkBtn} onClick={deleteReply}>
-                                                Удалить
-                                            </button>
+                                            <div>
+                                                <Button onClick={deleteReply}>Delete</Button>
+                                            </div>
                                         )}
                                     </div>
                                 </li>
@@ -261,9 +283,11 @@ export default function CommentThread({ postId, comment, depth = 0, onDeleted }:
                     <button className={s.moreBtn} onClick={loadMoreReplies} disabled={loadingMore}>
                         {loadingMore ? "Loading…" : "Show answers"}
                     </button>
-                    {typeof rTotal === "number" && (
-                        <span className={s.totalHint}>Показано {replies.length} из {rTotal}</span>
-                    )}
+                        {typeof effectiveTotal === "number" && (
+                        <span className={s.totalHint}>
+                            Show {repliesState.length} from {effectiveTotal}
+                        </span>
+                        )}
                 </div>
             )}
         </li>

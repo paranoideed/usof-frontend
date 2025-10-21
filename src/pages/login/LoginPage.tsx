@@ -7,7 +7,7 @@ import Button from "@/components/ui/Button";
 import TextField from "@/components/ui/TextField";
 import { FormError } from "@/components/ui/FormAlert";
 
-import { login as apiLogin } from "@/features/auth/login";
+import login from "@/features/auth/login";
 
 import s from "./LoginPage.module.scss";
 
@@ -48,7 +48,7 @@ export default function LoginPage() {
 
         try {
             setLoading(true);
-            const data = await apiLogin({ identifier, password });
+            const data = await login({ identifier, password });
 
             Cookies.set("token", data.token, {
                 expires: 7,
