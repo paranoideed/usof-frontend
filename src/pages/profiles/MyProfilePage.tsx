@@ -16,6 +16,7 @@ import updateMe from "@features/profiles/update.ts";
 import type {MeResponse} from "@features/profiles/get.ts";
 
 import s from "./MyProfilePage.module.scss";
+import AdminCreateUserForm from "@pages/profiles/AdminCreateUserForm.tsx";
 
 export default function MyProfilePage() {
     const { data, loading, error, status, setData } = useProfile();
@@ -25,6 +26,7 @@ export default function MyProfilePage() {
     const [fieldErrors, setFieldErrors] = useState<{ username?: string; pseudonym?: string }>({});
     const [saving, setSaving] = useState(false);
     const [ok, setOk] = useState<string | null>(null);
+    const [createOpen, setCreateOpen] = useState(false);
 
     const navigate = useNavigate();
 
@@ -105,19 +107,31 @@ export default function MyProfilePage() {
                 {ok && <FormOk>{ok}</FormOk>}
 
                 {data && !editing && (
-                    <ProfileView
-                        avatar={data.avatar}
-                        username={(data as any).username ?? (data as any).login}
-                        pseudonym={(data as any).pseudonym}
-                        reputation={"reputation" in (data as any) ? (data as any).reputation : null}
-                        created_at={data.created_at}
-                        actions={
-                            <>
-                                <Button onClick={startEdit}>Edit</Button>
-                                <Button onClick={userLogout}>Logout</Button>
-                            </>
-                        }
-                    />
+                    <>
+                        <ProfileView
+                            avatar={data.avatar}
+                            username={(data as any).username ?? (data as any).login}
+                            pseudonym={(data as any).pseudonym}
+                            reputation={"reputation" in (data as any) ? (data as any).reputation : null}
+                            created_at={data.created_at}
+                            actions={
+                                <>
+                                    <Button onClick={startEdit}>Edit</Button>
+                                    <Button onClick={userLogout}>Logout</Button>
+
+                                    {((data as any).role === "admin") && (
+                                        <Button onClick={() => setCreateOpen((v) => !v)}>
+                                            {createOpen ? "Close create form" : "Create user"}
+                                        </Button>
+                                    )}
+                                </>
+                            }
+                        />
+
+                        {((data as any).role === "admin") && createOpen && (
+                            <AdminCreateUserForm onSuccess={() => { /* можно обновить список/метрику */ }} onCancel={() => setCreateOpen(false)} />
+                        )}
+                    </>
                 )}
 
                 {data && editing && (
