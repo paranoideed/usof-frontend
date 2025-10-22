@@ -7,6 +7,8 @@ import { FormError, FormOk } from "@/components/ui/FormAlert";
 
 import { registerByAdmin } from "@/features/auth/register";
 
+import s from "./AdminCreateUserForm.module.scss";
+
 type FieldErrors = {
     username?: string;
     email?: string;
@@ -83,8 +85,8 @@ export default function AdminCreateUserForm({ onSuccess, onCancel }: Props) {
     }
 
     return (
-        <div style={{ marginTop: 16 }}>
-            <h4 style={{ marginBottom: 8 }}>Create user (admin)</h4>
+        <div className={s.container}>
+            <h4 className={s.Title}>Create user</h4>
 
             {err && <FormError>{err}</FormError>}
             {ok  && <FormOk>{ok}</FormOk>}

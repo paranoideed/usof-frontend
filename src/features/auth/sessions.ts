@@ -2,7 +2,6 @@ import Cookies from "js-cookie";
 
 export type UserRole = "admin" | "user" | string;
 
-
 function decodeBase64Url(input: string): string {
     const base64 = input.replace(/-/g, "+").replace(/_/g, "/");
     const pad = base64.length % 4 === 0 ? 0 : 4 - (base64.length % 4);

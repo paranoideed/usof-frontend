@@ -17,6 +17,7 @@ import type {MeResponse} from "@features/profiles/get.ts";
 
 import s from "./MyProfilePage.module.scss";
 import AdminCreateUserForm from "@pages/profiles/AdminCreateUserForm.tsx";
+import ResetPasswordForm from "@pages/profiles/ResetPasswordForm.tsx";
 
 export default function MyProfilePage() {
     const { data, loading, error, status, setData } = useProfile();
@@ -27,6 +28,7 @@ export default function MyProfilePage() {
     const [saving, setSaving] = useState(false);
     const [ok, setOk] = useState<string | null>(null);
     const [createOpen, setCreateOpen] = useState(false);
+    const [resetOpen, setResetOpen] = useState(false);
 
     const navigate = useNavigate();
 
@@ -118,7 +120,9 @@ export default function MyProfilePage() {
                                 <>
                                     <Button onClick={startEdit}>Edit</Button>
                                     <Button onClick={userLogout}>Logout</Button>
-
+                                    <Button onClick={() => setResetOpen(v => !v)}>
+                                        {resetOpen ? "Close reset" : "Reset password"}
+                                    </Button>
                                     {((data as any).role === "admin") && (
                                         <Button onClick={() => setCreateOpen((v) => !v)}>
                                             {createOpen ? "Close create form" : "Create user"}
@@ -131,6 +135,7 @@ export default function MyProfilePage() {
                         {((data as any).role === "admin") && createOpen && (
                             <AdminCreateUserForm onSuccess={() => { /* можно обновить список/метрику */ }} onCancel={() => setCreateOpen(false)} />
                         )}
+                        {resetOpen && <ResetPasswordForm onCancel={() => setResetOpen(false)} />}
                     </>
                 )}
 
