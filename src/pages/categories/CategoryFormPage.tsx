@@ -7,6 +7,7 @@ import { createCategory } from "@features/categories/create.ts";
 import { listCategories } from "@features/categories/list.ts";
 
 import s from "./CategoryFormPage.module.scss";
+import Button from "@components/ui/Button.tsx";
 
 export default function CategoryFormPage() {
     const { id } = useParams();
@@ -29,7 +30,7 @@ export default function CategoryFormPage() {
                     setTitle(found.title);
                     setDescription(found.description);
                 } else {
-                    setError("Категория не найдена");
+                    setError("Category not found");
                 }
             })
             .catch((e) => setError(e?.message || String(e)))
@@ -43,7 +44,7 @@ export default function CategoryFormPage() {
     async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
         setError(null);
-        if (!title.trim()) return setError("Введите название");
+        if (!title.trim()) return setError("Title is required");
         setLoading(true);
         try {
             if (editing && id) await updateCategory({ id, title, description });
@@ -59,8 +60,8 @@ export default function CategoryFormPage() {
     return (
         <div className={s.page}>
             <div className={s.header}>
-                <h1 className={s.h1}>{editing ? "Изменить категорию" : "Создать категорию"}</h1>
-                <button type="button" className={s.backBtn} onClick={() => navigate(-1)}>Назад</button>
+                <h1 className={s.h1}>{editing ? "Change category" : "Create category"}</h1>
+                <button type="button" className={s.backBtn} onClick={() => navigate(-1)}>Back</button>
             </div>
 
             <div className={s.card}>
@@ -68,36 +69,37 @@ export default function CategoryFormPage() {
 
                 <form className={s.form} onSubmit={onSubmit}>
                     <label className={s.field}>
-                        <span className={s.label}>Название</span>
+                        <span className={s.label}>Title</span>
                         <input
                             className={s.input}
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            placeholder="Введите название"
+                            placeholder="Title of the category"
                             maxLength={64}
                         />
                     </label>
 
                     <label className={s.field}>
-                        <span className={s.label}>Описание</span>
+                        <span className={s.label}>Description</span>
                         <textarea
                             className={s.input}
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            placeholder="Коротко о категории"
+                            placeholder="Description of the category"
                             rows={5}
                             maxLength={1024}
                         />
-                        <span className={s.hint}>До 1024 символов</span>
+                        <span className={s.hint}>Not more than 10000</span>
                     </label>
 
                     <div className={s.actions}>
-                        <button type="submit" className={s.primary} disabled={loading}>
-                            {loading ? "Сохранение…" : "Сохранить"}
-                        </button>
-                        <button type="button" className={s.ghost} onClick={() => navigate(-1)} disabled={loading}>
-                            Отмена
-                        </button>
+                        <Button type="submit" disabled={loading}>
+                            {loading ? "Creating…" : "Create"}
+                        </Button>
+
+                        <Button type="button" onClick={() => navigate(-1)} disabled={loading}>
+                            Cancel
+                        </Button>
                     </div>
                 </form>
             </div>

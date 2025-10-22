@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import NavBar from "@components/ui/NavBar.tsx";
 import CategoryGrid from "@/components/categories/CategoryGrid";
@@ -11,8 +11,9 @@ import { deleteCategory } from "@features/categories/delete.ts";
 import type {Category} from "@features/categories/types.ts";
 
 import s from "./CategoriesPage.module.scss";
+import Fab from "@components/ui/Fab.tsx";
 
-const PAGE_SIZE = 20; // сколько карточек грузим за раз
+const PAGE_SIZE = 20;
 
 export default function CategoriesPage() {
     const [all, setAll] = React.useState<Category[]>([]);
@@ -100,9 +101,10 @@ export default function CategoriesPage() {
                     </button>
                 )}
                 {admin && (
-                    <Link className={s.createBtn} to="/categories/create">
-                        Create New
-                    </Link>
+                    <Fab
+                        onClick={() => navigate("/categories/create")}
+                        title="Create post"
+                    />
                 )}
             </div>
         </div>

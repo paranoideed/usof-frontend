@@ -1,3 +1,5 @@
+@use "../../styles/variables" as *;
+
 .page {
   max-width: 720px;
   margin: 24px auto 0;
@@ -22,21 +24,21 @@
 .backBtn {
   padding: 8px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid $main-border;
   background: transparent;
   color: inherit;
   cursor: pointer;
   transition: background-color .2s ease;
-  &:hover { background-color: rgba(255,255,255,0.06); }
+  &:hover { background-color: $main-hover; }
 }
 
 .card {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.10);
+  background: $second-main;
+  border: 1px solid $main-border;
   border-radius: 14px;
   padding: 18px;
   backdrop-filter: blur(4px);
-  box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+  box-shadow: 0 6px 24px $main-border;
 }
 
 .alert {
@@ -63,34 +65,32 @@
 
 .label {
   font-size: 13px;
-  color: #c9c9c9;
+  color: $text-gray;
 }
 
 .input {
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(20,20,20,0.35);
+  border: 1px solid $main-border;
+  background: $input-bg;
   color: inherit;
   outline: none;
   transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
 
   &:hover {
     border-color: rgba(255,255,255,0.24);
-    background-color: rgba(20,20,20,0.42);
   }
   &:focus {
-    border-color: #4a90e2;
-    box-shadow: 0 0 0 3px rgba(74,144,226,0.25);
-    background-color: rgba(20,20,20,0.5);
+    border-color: $brand;
+    box-shadow: 0 0 0 3px $brand-hover;
   }
 
-  &::placeholder { color: #9a9a9a; }
+  &::placeholder { color: $text-gray; }
 }
 
 .hint {
   font-size: 12px;
-  color: #8d8d8d;
+  color: $text-gray;
 }
 
 .actions {
@@ -110,25 +110,15 @@
   will-change: transform;
 }
 
-.primary {
-  background: #4a90e2;
-  border-color: #1f476e;
-  color: #fff;
-  &:hover { background-color: #356fb2; }
-  &:active { transform: translateY(1px); }
-  &:disabled { opacity: .6; cursor: default; transform: none; }
-}
-
 .ghost {
   background: transparent;
   color: inherit;
-  border-color: rgba(255,255,255,0.18);
-  &:hover { background-color: rgba(255,255,255,0.06); }
+  border-color: $main-border;
+  &:hover { background-color: $main-hover; }
   &:active { transform: translateY(1px); }
   &:disabled { opacity: .6; cursor: default; transform: none; }
 }
 
-/* мелкая адаптация */
 @media (max-width: 480px) {
   .h1 { font-size: 22px; }
   .card { padding: 14px; }
