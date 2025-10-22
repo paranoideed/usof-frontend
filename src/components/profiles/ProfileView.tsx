@@ -1,10 +1,11 @@
 import * as React from "react";
 
 import s from "./ProfileView.module.scss";
-import DEFAULT_PIC from "@features/ui.ts";
+import AvatarImg from "@components/ui/AvatarImg.tsx";
+import getUserPic from "@features/ui.ts";
 
 type Props = {
-    avatar?:    string | null;
+    user_id:  string;
     username:   string;
     pseudonym?: string | null;
     reputation: number;
@@ -13,7 +14,7 @@ type Props = {
 };
 
 export default function ProfileView({
-    avatar,
+    user_id,
     username,
     pseudonym,
     reputation,
@@ -23,9 +24,9 @@ export default function ProfileView({
     return (
         <div className={s.container}>
             <div className={s.profile}>
-                <img
+                <AvatarImg
                     className={s.avatar}
-                    src={avatar || DEFAULT_PIC}
+                    src={getUserPic(user_id)}
                     alt="avatar"
                 />
                 <div className={s.info}>

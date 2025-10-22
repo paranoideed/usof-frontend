@@ -18,8 +18,9 @@ import { getCurrentUserId, getCurrentUserRole } from "@features/auth/sessions.ts
 import {type MyReaction, parseMyReaction } from "@features/likes/types.ts";
 import { type Post } from "@/features/posts/posts";
 
-import DEFAULT_PIC from "@features/ui.ts";
 import s from "@components/posts/PostFull.module.scss";
+import getUserPic from "@features/ui.ts";
+import AvatarImg from "@components/ui/AvatarImg.tsx";
 
 export default function PostFull(props: Post) {
     const navigate = useNavigate();
@@ -121,7 +122,7 @@ export default function PostFull(props: Post) {
             <div className={s.header}>
                 <div className={s.postInfo}>
                     <div className={s.meta}>
-                        <img className={s.avatar} src={DEFAULT_PIC} alt="avatar" />
+                        <AvatarImg className={s.avatar} src={getUserPic(post.author_id)} alt="avatar" />
                         <div className={s.username}>
                             <Link
                                 to={`/profiles/u/${post.author_username}`}

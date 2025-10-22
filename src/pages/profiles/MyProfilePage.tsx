@@ -111,7 +111,7 @@ export default function MyProfilePage() {
                 {data && !editing && (
                     <>
                         <ProfileView
-                            avatar={data.avatar}
+                            user_id={data.id}
                             username={(data as any).username ?? (data as any).login}
                             pseudonym={(data as any).pseudonym}
                             reputation={"reputation" in (data as any) ? (data as any).reputation : null}
@@ -141,7 +141,7 @@ export default function MyProfilePage() {
 
                 {data && editing && (
                     <ProfileEditor
-                        avatar={data.avatar}
+                        userId={data.id}
                         username={username}
                         pseudonym={pseudonym}
                         fieldErrors={fieldErrors}

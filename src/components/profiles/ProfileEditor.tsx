@@ -1,13 +1,14 @@
 import * as React from "react";
-
 import Button from "../ui/Button.tsx";
 import TextField from "../ui/TextField.tsx";
-
 import s from "./ProfileEditor.module.scss";
-import DEFAULT_PIC from "@features/ui.ts";
+import updateAvatar from "@features/profiles/updateAvatar.ts";
+
+import getUserPic from "@features/ui.ts";
+import AvatarImg from "@components/ui/AvatarImg.tsx"; // <-- добавили
 
 type Props = {
-    avatar?: string | null;
+    userId: string;
     username: string;
     pseudonym: string;
     fieldErrors: { username?: string; pseudonym?: string };
@@ -18,25 +19,68 @@ type Props = {
     onSubmit: (e: React.FormEvent) => void;
 };
 
-export default function ProfileEditor({
-    avatar,
-    username,
-    pseudonym,
-    fieldErrors,
-    saving,
-    onChangeUsername,
-    onChangePseudonym,
-    onCancel,
-    onSubmit,
-}: Props) {
+export default function ProfileEditor(props: Props) {
+    const {
+        userId,
+        username,
+        pseudonym,
+        fieldErrors,
+        saving,
+        onChangeUsername,
+        onChangePseudonym,
+        onCancel,
+        onSubmit,
+    } = props;
+
+    const [uploading, setUploading] = React.useState(false);
+    const fileRef = React.useRef<HTMLInputElement>(null);
+    let   avatar = getUserPic(userId); // <-- добавили
+
+    async function onAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            setUploading(true);
+
+            const profile = await updateAvatar(file);
+            if (profile.avatar) {
+                avatar = profile.avatar;
+            }
+        } catch (err: any) {
+            alert(err.message || "Failed to upload avatar");
+        } finally {
+            setUploading(false);
+            if (fileRef.current) fileRef.current.value = "";
+        }
+    }
+
     return (
         <form onSubmit={onSubmit} noValidate>
             <div className={s.profile}>
-                <img
-                    className={s.avatar}
-                    src={avatar || DEFAULT_PIC}
-                    alt="avatar"
-                />
+                <div className={s.avatarWrapper}>
+                    <AvatarImg
+                        className={s.avatar}
+                        src={avatar}
+                        alt="avatar"
+                        onClick={() => fileRef.current?.click()}
+                    />
+                    <input
+                        ref={fileRef}
+                        type="file"
+                        accept="image/png"
+                        hidden
+                        onChange={onAvatarChange}
+                    />
+                    <Button
+                        type="button"
+                        onClick={() => fileRef.current?.click()}
+                        disabled={uploading}
+                    >
+                        {uploading ? "Uploading…" : "Change Avatar"}
+                    </Button>
+                </div>
+
                 <div className={s.info}>
                     <TextField
                         label="Username"
@@ -57,8 +101,12 @@ export default function ProfileEditor({
             </div>
 
             <div className={s.actions}>
-                <Button type="button" onClick={onCancel} disabled={saving}>Cancel</Button>
-                <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
+                <Button type="button" onClick={onCancel} disabled={saving}>
+                    Cancel
+                </Button>
+                <Button type="submit" disabled={saving}>
+                    {saving ? "Saving…" : "Save"}
+                </Button>
             </div>
         </form>
     );

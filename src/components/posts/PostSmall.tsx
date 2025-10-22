@@ -5,8 +5,9 @@ import RatingPost from "@components/ui/RatingPost";
 
 import type { Post } from "@/features/posts/posts";
 
-import DEFAULT_PIC from "@features/ui";
 import s from "./PostSmall.module.scss";
+import getUserPic from "@features/ui.ts";
+import AvatarImg from "@components/ui/AvatarImg.tsx";
 
 type Props = {
     post: Post;
@@ -38,7 +39,7 @@ export default function PostSmall({ post }: Props) {
         >
             <div className={s.header}>
                 <div>
-                    <img className={s.avatar} src={DEFAULT_PIC} alt="avatar" />
+                    <AvatarImg className={s.avatar} src={getUserPic(post.data.author_id)} alt="avatar" />
                 </div>
                 <div className={s.meta}>
                     <div className={s.username}>
@@ -65,8 +66,6 @@ export default function PostSmall({ post }: Props) {
                         : post.data.content}
                 </div>
             )}
-
-            {/* Просто рейтинг, без кликов и стопов */}
         </div>
         <div className={s.footer}>
             <RatingPost count={rating} />

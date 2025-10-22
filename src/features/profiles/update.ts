@@ -20,3 +20,4 @@ export default async function updateMe(input: UpdateMeInput): Promise<UpdateMeRe
         throw new Error(error.message || "Network error");
     }
 }
+
