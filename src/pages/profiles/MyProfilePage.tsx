@@ -32,13 +32,13 @@ export default function MyProfilePage() {
 
     const navigate = useNavigate();
 
-    if (loading) return <div className={s.root}>Loading…</div>;
-
     const startEdit = () => {
         if (!data) return;
         setFieldErrors({});
         setOk(null);
-        setUsername(((data as any).username ?? (data as any).login ?? "") as string);
+        setUsername((
+            (data as any).username ?? (data as any).login ?? "") as string
+        );
         setPseudonym(((data as any).pseudonym ?? "") as string);
         setEditing(true);
     };
@@ -55,7 +55,6 @@ export default function MyProfilePage() {
 
     const onSave = async (e: React.FormEvent) => {
         e.preventDefault();
-
         const next: { username?: string; pseudonym?: string } = {};
         if (!username.trim()) next.username = "This is required";
         if (username && username.trim().length < 3) next.username = "Min 3 characters";
@@ -64,13 +63,9 @@ export default function MyProfilePage() {
         try {
             setSaving(true);
             const updated = await updateMe({ username: username.trim(), pseudonym: pseudonym.trim() || null });
-
             setData((prev: MeResponse | null) =>
-                prev
-                    ? { ...prev, username: updated.username, pseudonym: (updated as any).pseudonym }
-                    : prev
+                prev ? { ...prev, username: updated.username, pseudonym: (updated as any).pseudonym } : prev
             );
-
             setOk("Profile updated");
             setEditing(false);
         } catch (err: any) {
@@ -97,6 +92,8 @@ export default function MyProfilePage() {
             <div className={s.card}>
                 <h3 className={s.title}>My Profile</h3>
 
+                {loading && <div>Loading…</div>}
+
                 {error && (
                     <>
                         <FormError>{error}</FormError>
@@ -108,7 +105,7 @@ export default function MyProfilePage() {
 
                 {ok && <FormOk>{ok}</FormOk>}
 
-                {data && !editing && (
+                {data && !editing && !loading && (
                     <>
                         <ProfileView
                             user_id={data.id}
@@ -131,15 +128,14 @@ export default function MyProfilePage() {
                                 </>
                             }
                         />
-
                         {((data as any).role === "admin") && createOpen && (
-                            <AdminCreateUserForm onSuccess={() => { /* можно обновить список/метрику */ }} onCancel={() => setCreateOpen(false)} />
+                            <AdminCreateUserForm onSuccess={() => {}} onCancel={() => setCreateOpen(false)} />
                         )}
                         {resetOpen && <ResetPasswordForm onCancel={() => setResetOpen(false)} />}
                     </>
                 )}
 
-                {data && editing && (
+                {data && editing && !loading && (
                     <ProfileEditor
                         userId={data.id}
                         username={username}
