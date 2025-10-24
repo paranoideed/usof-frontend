@@ -48,18 +48,6 @@
 
 }
 
-.list {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-
-.loader {
-  text-align: center;
-  opacity: 0.8;
-  padding: 16px;
-}
-
 .error {
   color: #ff6b6b;
   padding: 8px 12px;

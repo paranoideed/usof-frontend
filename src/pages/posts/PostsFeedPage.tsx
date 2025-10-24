@@ -4,9 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import usePostsFeed from "./hooks/usePostsFeed";
 
 import Fab from "@components/ui/Fab";
-import Button from "@components/ui/Button";
 import NavBar from "@/components/ui/NavBar";
-import PostSmall from "@/components/posts/PostSmall";
 import CreatePostModal from "@pages/posts/CreatePostModal";
 
 import api from "@features/api";
@@ -14,6 +12,7 @@ import api from "@features/api";
 import type { ListPostsParams } from "@features/posts/fetch";
 
 import s from "@/pages/posts/PostsFeedPage.module.scss";
+import PostsList from "@components/posts/PostsList.tsx";
 
 type CategoryRow = { id: string; title: string };
 
@@ -119,19 +118,7 @@ export default function PostsFeedPage() {
                 {catErr && <div className={s.error}>Failed to load categories: {catErr}</div>}
                 {err && <div className={s.error}>{err}</div>}
 
-                <div className={s.list}>
-                    {items.map((p) => (
-                        <PostSmall key={p.data.id} post={p} />
-                    ))}
-                </div>
-
-                <div className={s.loader}>
-                    {loading && <div>Loading…</div>}
-                    {!loading && hasMore && (
-                        <Button className={s.btn} onClick={loadMore}>Show More</Button>
-                    )}
-                    {!loading && !hasMore && items.length > 0 && <div>No more posts</div>}
-                </div>
+                <PostsList items={items} loading={loading} hasMore={hasMore} loadMore={loadMore}></PostsList>
 
                 <Fab onClick={() => setCreateOpen(true)} title="Create post" />
             </div>

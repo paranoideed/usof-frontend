@@ -1,0 +1,22 @@
+@use "../../styles/variables" as *;
+
+.button {
+  width: 100%;
+  background: $brand;
+  color: white;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+
+  &:hover {
+    filter: brightness(1.05);
+    background: $brand-hover;
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: default;
+  }
+}
