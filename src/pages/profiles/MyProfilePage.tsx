@@ -17,7 +17,7 @@ import AdminCreateUserForm from "@pages/profiles/AdminCreateUserForm.tsx";
 import ResetPasswordForm from "@pages/profiles/ResetPasswordForm.tsx";
 
 import s from "./MyProfilePage.module.scss";
-import type {Profile} from "@features/profiles/types.ts";
+import type { Profile } from "@features/profiles/types.ts";
 
 export default function MyProfilePage() {
     const { data, loading, error, status, setData } = useMeProfile();
@@ -27,8 +27,9 @@ export default function MyProfilePage() {
     const [fieldErrors, setFieldErrors] = useState<{ username?: string; pseudonym?: string }>({});
     const [saving, setSaving] = useState(false);
     const [ok, setOk] = useState<string | null>(null);
+
+    // создание нового юзера по-прежнему по кнопке (для админа)
     const [createOpen, setCreateOpen] = useState(false);
-    const [resetOpen, setResetOpen] = useState(false);
 
     const navigate = useNavigate();
 
@@ -36,9 +37,7 @@ export default function MyProfilePage() {
         if (!data) return;
         setFieldErrors({});
         setOk(null);
-        setUsername(
-            ((data as any).username ?? (data as any).login ?? "") as string
-        );
+        setUsername(((data as any).username ?? (data as any).login ?? "") as string);
         setPseudonym(((data as any).pseudonym ?? "") as string);
         setEditing(true);
     };
@@ -57,8 +56,7 @@ export default function MyProfilePage() {
         e.preventDefault();
         const next: { username?: string; pseudonym?: string } = {};
         if (!username.trim()) next.username = "This is required";
-        if (username && username.trim().length < 3)
-            next.username = "Min 3 characters";
+        if (username && username.trim().length < 3) next.username = "Min 3 characters";
         if (Object.keys(next).length) {
             setFieldErrors(next);
             return;
@@ -66,7 +64,7 @@ export default function MyProfilePage() {
 
         try {
             setSaving(true);
-            const trimmedUsername = username.trim(); // Используем одно и то же значение
+            const trimmedUsername = username.trim();
 
             const updated = await updateMe({
                 username: trimmedUsername,
@@ -89,13 +87,10 @@ export default function MyProfilePage() {
             const d = err?.response?.data;
             if (status === 400 && d && typeof d === "object") {
                 const props = d.properties || {};
-                const first = (arr: unknown) =>
-                    Array.isArray(arr) && arr.length ? String(arr[0]) : undefined;
+                const first = (arr: unknown) => (Array.isArray(arr) && arr.length ? String(arr[0]) : undefined);
                 const fe: { username?: string; pseudonym?: string } = {};
-                if (props.username?.errors)
-                    fe.username = first(props.username.errors);
-                if (props.pseudonym?.errors)
-                    fe.pseudonym = first(props.pseudonym.errors);
+                if (props.username?.errors) fe.username = first(props.username.errors);
+                if (props.pseudonym?.errors) fe.pseudonym = first(props.pseudonym.errors);
                 if (Object.keys(fe).length) setFieldErrors(fe);
             } else {
                 alert(d?.message || d?.error || err?.message || "Update failed");
@@ -109,8 +104,6 @@ export default function MyProfilePage() {
         <div className={s.root}>
             <NavBar />
             <div className={s.card}>
-                <h3 className={s.title}>My Profile</h3>
-
                 {loading && <div>Loading…</div>}
 
                 {error && (
@@ -131,47 +124,29 @@ export default function MyProfilePage() {
                 {data && !editing && !loading && (
                     <>
                         <ProfileView
-                            user_id={data.id}
+                            avatar_url={data.avatar_url}
                             username={(data as any).username ?? (data as any).login}
                             pseudonym={(data as any).pseudonym}
-                            reputation={
-                                "reputation" in (data as any)
-                                    ? (data as any).reputation
-                                    : null
-                            }
+                            reputation={"reputation" in (data as any) ? (data as any).reputation : null}
                             created_at={data.created_at}
                             actions={
                                 <>
                                     <Button onClick={startEdit}>Edit</Button>
                                     <Button onClick={userLogout}>Logout</Button>
-                                    <Button onClick={() => setResetOpen((v) => !v)}>
-                                        {resetOpen ? "Close reset" : "Reset password"}
-                                    </Button>
                                     {(data as any).role === "admin" && (
                                         <Button onClick={() => setCreateOpen((v) => !v)}>
-                                            {createOpen
-                                                ? "Close create form"
-                                                : "Create user"}
+                                            {createOpen ? "Close create form" : "Create user"}
                                         </Button>
                                     )}
                                 </>
                             }
                         />
-                        {(data as any).role === "admin" && createOpen && (
-                            <AdminCreateUserForm
-                                onSuccess={() => {}}
-                                onCancel={() => setCreateOpen(false)}
-                            />
-                        )}
-                        {resetOpen && (
-                            <ResetPasswordForm onCancel={() => setResetOpen(false)} />
-                        )}
                     </>
                 )}
 
                 {data && editing && !loading && (
                     <ProfileEditor
-                        userId={data.id}
+                        avatarUrl={data.avatar_url}
                         username={username}
                         pseudonym={pseudonym}
                         fieldErrors={fieldErrors}
@@ -183,6 +158,21 @@ export default function MyProfilePage() {
                     />
                 )}
             </div>
+
+            {data && (
+                <section className={s.section}>
+                    <ResetPasswordForm onCancel={() => { /* оставим пустым, если в форме есть cancel — можно скрыть поля локально */ }} />
+                </section>
+            )}
+
+            {data && (data as any).role === "admin" && createOpen && (
+                <section className={s.section}>
+                    <AdminCreateUserForm
+                        onSuccess={() => {}}
+                        onCancel={() => setCreateOpen(false)}
+                    />
+                </section>
+            )}
         </div>
     );
 }

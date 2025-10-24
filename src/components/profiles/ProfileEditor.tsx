@@ -8,9 +8,9 @@ import getUserPic from "@features/ui.ts";
 import AvatarImg from "@components/ui/AvatarImg.tsx"; // <-- добавили
 
 type Props = {
-    userId: string;
     username: string;
     pseudonym: string;
+    avatarUrl?: string | null;
     fieldErrors: { username?: string; pseudonym?: string };
     saving: boolean;
     onChangeUsername: (v: string) => void;
@@ -21,9 +21,9 @@ type Props = {
 
 export default function ProfileEditor(props: Props) {
     const {
-        userId,
         username,
         pseudonym,
+        avatarUrl,
         fieldErrors,
         saving,
         onChangeUsername,
@@ -34,7 +34,7 @@ export default function ProfileEditor(props: Props) {
 
     const [uploading, setUploading] = React.useState(false);
     const fileRef = React.useRef<HTMLInputElement>(null);
-    let   avatar = getUserPic(userId); // <-- добавили
+    let   avatar = getUserPic(avatarUrl);
 
     async function onAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
@@ -44,8 +44,8 @@ export default function ProfileEditor(props: Props) {
             setUploading(true);
 
             const profile = await updateAvatar(file);
-            if (profile.avatar) {
-                avatar = profile.avatar;
+            if (profile.avatar_url) {
+                avatar = profile.avatar_url;
             }
         } catch (err: any) {
             console.error(err);

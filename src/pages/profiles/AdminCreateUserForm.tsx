@@ -131,23 +131,22 @@ export default function AdminCreateUserForm({ onSuccess, onCancel }: Props) {
                     required
                 />
 
-                {/* Простой селект без внешних зависимостей */}
-                <div style={{ margin: "12px 0" }}>
-                    <label style={{ display: "block", fontSize: 14, marginBottom: 6 }}>Role</label>
+                <div>
+                    <label className={s.roleTitle}>Role</label>
                     <select
                         value={role}
                         onChange={(e) => setRole(e.currentTarget.value as "user" | "admin")}
-                        style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #444" }}
+                        className={s.choseRole}
                     >
                         <option value="user">user</option>
                         <option value="admin">admin</option>
                     </select>
                     {fieldErrors.role && (
-                        <div style={{ color: "#ff6b6b", fontSize: 12, marginTop: 6 }}>{fieldErrors.role}</div>
+                        <div className={s.role}>{fieldErrors.role}</div>
                     )}
                 </div>
 
-                <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+                <div className={s.buttonsContainer}>
                     <Button type="submit" disabled={loading}>
                         {loading ? "Loading..." : "Create"}
                     </Button>

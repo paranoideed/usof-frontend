@@ -10,6 +10,7 @@ import { FormError } from "@/components/ui/FormAlert";
 import login from "@/features/auth/login";
 
 import {
+    saveAvatar,
     saveUsername,
 } from "@/features/auth/sessions";
 
@@ -60,7 +61,11 @@ export default function LoginPage() {
                 secure: window.location.protocol === "https:",
             });
 
-            saveUsername(data.username);
+            saveUsername(data.profile.username);
+
+            if (data.profile.avatar_url) {
+                saveAvatar(data.profile.avatar_url);
+            }
 
             navigate("/profiles/me");
         } catch (err: any) {

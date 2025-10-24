@@ -2,10 +2,10 @@ import * as React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 
 import AvatarImg from "@components/ui/AvatarImg.tsx";
-import getUserPic from "@features/ui.ts";
-import { getCurrentUserId, getUsername } from "@features/auth/sessions.ts";
+import {getAvatar, getCurrentUserId, getUsername} from "@features/auth/sessions.ts";
 
 import s from "./NavBar.module.scss";
+import getUserPic from "@features/ui.ts";
 
 export default function NavBar() {
     const linkCls = ({ isActive }: { isActive: boolean }) =>
@@ -15,6 +15,7 @@ export default function NavBar() {
 
     const userId = getCurrentUserId();
     const username = getUsername();
+    const avatarUrl = getAvatar();
 
     React.useEffect(() => {
         if (!username) {
@@ -54,7 +55,7 @@ export default function NavBar() {
                         <NavLink to="/profiles/me" className={linkCls}>
                             <AvatarImg
                                 className={s.avatar}
-                                src={getUserPic(userId)}
+                                src={getUserPic(avatarUrl)}
                             />
                             @{username}
                         </NavLink>

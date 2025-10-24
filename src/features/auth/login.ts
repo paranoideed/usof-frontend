@@ -1,8 +1,9 @@
 import api from "@features/api.ts";
+import type {Profile} from "@features/profiles/types.ts";
+import {saveAvatar, saveUsername} from "@features/auth/sessions.ts";
 
 export type UserToken = {
-    user_id: string;
-    username: string;
+    profile: Profile;
     token: string
 };
 
@@ -28,6 +29,12 @@ export default async function login(input: LoginInput): Promise<UserToken> {
     try {
         const { data } = await api.post('/auth/login', payload);
         console.log("success: ", data);
+
+        console.log(data);
+
+        saveAvatar(data.avatar_url);
+        saveUsername(data.username);
+
         return data;
     } catch (error: any) {
         if (error.response) {

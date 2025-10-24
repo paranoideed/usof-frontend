@@ -28,6 +28,8 @@ export default function PostSmall({ post }: Props) {
         }
     };
 
+    console.log("avatar url:", post.data.author_avatar_url);
+
     return (
     <article className={s.container}>
         <div
@@ -39,7 +41,7 @@ export default function PostSmall({ post }: Props) {
         >
             <div className={s.header}>
                 <div>
-                    <AvatarImg className={s.avatar} src={getUserPic(post.data.author_id)} alt="avatar" />
+                    <AvatarImg className={s.avatar} src={getUserPic(post.data.author_avatar_url)} alt="avatar" />
                 </div>
                 <div className={s.meta}>
                     <div className={s.username}>

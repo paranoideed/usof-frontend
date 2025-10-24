@@ -5,18 +5,18 @@ import AvatarImg from "@components/ui/AvatarImg.tsx";
 import getUserPic from "@features/ui.ts";
 
 type Props = {
-    user_id:  string;
-    username:   string;
-    pseudonym?: string | null;
-    reputation: number;
-    created_at: string | Date;
-    actions?:   React.ReactNode;
+    username:    string;
+    pseudonym?:  string | null;
+    avatar_url?: string | null;
+    reputation:  number;
+    created_at:  string | Date;
+    actions?:    React.ReactNode;
 };
 
 export default function ProfileView({
-    user_id,
     username,
     pseudonym,
+    avatar_url,
     reputation,
     created_at,
     actions,
@@ -26,7 +26,7 @@ export default function ProfileView({
             <div className={s.profile}>
                 <AvatarImg
                     className={s.avatar}
-                    src={getUserPic(user_id)}
+                    src={getUserPic(avatar_url)}
                     alt="avatar"
                 />
                 <div className={s.info}>

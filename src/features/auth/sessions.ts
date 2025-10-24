@@ -62,3 +62,21 @@ export function getUsername(): string | null {
         return null;
     }
 }
+
+export function saveAvatar(avatarUrl: string): void {
+    try {
+        localStorage.setItem("avatar_url", avatarUrl);
+    } catch (e) {
+        console.error("Could not save avatar URL to localStorage", e);
+    }
+}
+
+export function getAvatar(): string | null {
+    try {
+        return localStorage.getItem("avatar_url");
+    } catch (e) {
+        console.error("Could not retrieve avatar URL from localStorage", e);
+        return null;
+    }
+}
+

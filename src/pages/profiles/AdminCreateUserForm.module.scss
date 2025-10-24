@@ -11,3 +11,31 @@
   margin-bottom: 16px;
   text-align: center;
 }
+
+.buttonsContainer {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.role {
+  color: #888;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.roleTitle {
+  font-weight: 600;
+  margin-bottom: 4px;
+  margin-right: 10px;
+}
+
+.choseRole {
+  padding: 8px;
+  width: 20%;
+  background: $second-main;
+  color: $text-primary;
+  border: $main-border;
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+}

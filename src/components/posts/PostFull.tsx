@@ -122,7 +122,7 @@ export default function PostFull(props: Post) {
             <div className={s.header}>
                 <div className={s.postInfo}>
                     <div className={s.meta}>
-                        <AvatarImg className={s.avatar} src={getUserPic(post.author_id)} alt="avatar" />
+                        <AvatarImg className={s.avatar} src={getUserPic(post.author_avatar_url)} alt="avatar" />
                         <div className={s.username}>
                             <Link
                                 to={`/profiles/u/${post.author_username}`}

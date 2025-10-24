@@ -50,7 +50,7 @@ export default function SearchProfilesPage() {
                                         id={u.id}
                                         username={u.username}
                                         pseudonym={u.pseudonym ?? undefined}
-                                        avatar={u.avatar ?? undefined}
+                                        avatar_url={u.avatar_url ?? undefined}
                                     />
                                 </li>
                             ))}

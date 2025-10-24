@@ -8,17 +8,17 @@ type Props = {
     id: string;
     username: string;
     pseudonym?: string | null;
-    avatar?: string | null;
+    avatar_url?: string | null;
     to?: string;
 };
 
-export default function ProfileMini({ id, username, pseudonym, to }: Props) {
+export default function ProfileMini({ id, username, pseudonym, avatar_url, to }: Props) {
     const href = to ?? `/profiles/id/${id}`;
     return (
         <Link to={href} className={s.item}>
             <AvatarImg
                 className={s.avatar}
-                src={getUserPic(id)}
+                src={getUserPic(avatar_url)}
                 alt="avatar"
             />
             <div className={s.meta}>

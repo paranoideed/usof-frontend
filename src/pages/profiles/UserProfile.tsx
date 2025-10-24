@@ -102,9 +102,9 @@ export default function UserProfilePage() {
 
                     {data && (
                         <ProfileView
-                            user_id={data.id}
                             username={data.username}
                             pseudonym={data.pseudonym ?? undefined}
+                            avatar_url={data.avatar_url ?? undefined}
                             reputation={data.reputation}
                             created_at={data.created_at}
                         />

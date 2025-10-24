@@ -53,16 +53,6 @@ export default function PostListFilterPanel({
                 <option value="oldest">oldest</option>
             </select>
 
-            {/*<select*/}
-            {/*    className={s.btn}*/}
-            {/*    value={orderDir}*/}
-            {/*    onChange={(e) => onChangeOrderDir(e.currentTarget.value as "asc" | "desc")}*/}
-            {/*    title="Order direction"*/}
-            {/*>*/}
-            {/*    <option value="desc">desc</option>*/}
-            {/*    <option value="asc">asc</option>*/}
-            {/*</select>*/}
-
             <select
                 className={s.btn}
                 value={categoryId}
