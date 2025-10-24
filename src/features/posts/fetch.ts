@@ -8,10 +8,10 @@ export type ListPostsParams = {
     status?:          PostStatus;
     title?:           string;
     category_id?:     string;
-    order_by?:  "created_at" | "updated_at" | "likes" | "dislikes" | "rating";
-    order_dir?: "asc" | "desc";
-    offset?: number;
-    limit?:  number;
+    order_by?:        "created_at" | "updated_at" | "likes" | "dislikes" | "rating";
+    order_dir?:       "asc" | "desc";
+    offset?:          number;
+    limit?:           number;
 };
 
 export async function listPosts(params: ListPostsParams): Promise<PostsList> {

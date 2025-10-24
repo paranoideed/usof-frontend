@@ -1,0 +1,29 @@
+@use "../../styles/variables" as *;
+
+.controls {
+  display: flex;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  background: var(--bg, transparent);
+  padding-bottom: 8px;
+  z-index: 1;
+}
+
+.filterInput {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.03);
+  color: inherit;
+}
+
+.btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: $brand;
+  cursor: pointer;
+}

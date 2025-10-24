@@ -12,31 +12,62 @@ import s from "./UserProfile.module.scss";
 import PostsList from "@components/posts/PostsList.tsx";
 import usePostsFeed from "@pages/posts/hooks/usePostsFeed.ts";
 import type { ListPostsParams } from "@features/posts/fetch.ts";
+import PostListFilterPanel, { type CategoryRow } from "@components/posts/PostListFilterPanel.tsx";
+
+import api from "@features/api";
+
+function useCategories() {
+    const [items, setItems] = React.useState<CategoryRow[]>([]);
+    const [loading, setLoading] = React.useState(false);
+    const [err, setErr] = React.useState<string | null>(null);
+
+    React.useEffect(() => {
+        let ok = true;
+        (async () => {
+            setLoading(true);
+            setErr(null);
+            try {
+                const r = await api.get("/categories");
+                setItems(r.data?.data ?? r.data ?? []);
+            } catch (e: any) {
+                setErr(e?.message ?? "Failed to load categories");
+            } finally {
+                if (ok) setLoading(false);
+            }
+        })();
+        return () => {
+            ok = false;
+        };
+    }, []);
+
+    return { items, loading, err };
+}
 
 export default function UserProfilePage() {
     const params = useParams();
     const userId = params.user_id || undefined;
     const username = params.username || undefined;
 
-    // локальные контролы для сортировки (если решишь вывести селект позже)
+    const [q, setQ] = React.useState<string>("");
     const [orderBy, setOrderBy] =
         React.useState<"rating" | "created_at" | "likes" | "dislikes">("rating");
-    const [q, setQ] = React.useState<string>("");
+    const [orderDir, setOrderDir] = React.useState<"asc" | "desc">("desc");
+    const [categoryId, setCategoryId] = React.useState<string>("");
 
-    // грузим профиль по user_id или username
     const { data, loading, error, status } = useProfileBy(userId, username);
 
-    // базовые фильтры для постов конкретного автора
+    const { items: categories, loading: catLoading, err: catErr } = useCategories();
+
     const filters = React.useMemo<ListPostsParams>(() => {
         return {
             author_id: data?.id || undefined,
             title: q || undefined,
             order_by: orderBy,
-            order_dir: "desc",
+            order_dir: orderDir,
+            category_id: categoryId || undefined,
         };
-    }, [data?.id, q, orderBy]);
+    }, [data?.id, q, orderBy, orderDir, categoryId]);
 
-    // фид постов пользователя
     const {
         items,
         loading: postsLoading,
@@ -49,11 +80,9 @@ export default function UserProfilePage() {
         baseFilters: filters,
     });
 
-    // когда подгрузился профиль или поменялись контролы — перезагрузить список
     React.useEffect(() => {
-        // не дергаем reload пока не знаем автора
         if (data?.id) reload();
-    }, [data?.id, orderBy, q]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [data?.id, q, orderBy, orderDir, categoryId]);
 
     if (loading) return <div className={s.root}>Loading…</div>;
 
@@ -83,27 +112,21 @@ export default function UserProfilePage() {
                 </div>
 
                 <div className={s.postsBlock}>
+                    {catErr && <div className={s.error}>Failed to load categories: {catErr}</div>}
                     {postsErr && <div className={s.error}>{String(postsErr)}</div>}
 
-                    {/*<div className={s.controls}>*/}
-                    {/*  <input*/}
-                    {/*    className={s.filterInput}*/}
-                    {/*    value={q}*/}
-                    {/*    onChange={(e) => setQ(e.currentTarget.value)}*/}
-                    {/*    placeholder="Search by title"*/}
-                    {/*  />*/}
-                    {/*  <select*/}
-                    {/*    className={s.btn}*/}
-                    {/*    value={orderBy}*/}
-                    {/*    onChange={(e) => setOrderBy(e.currentTarget.value as any)}*/}
-                    {/*    title="Sort posts"*/}
-                    {/*  >*/}
-                    {/*    <option value="rating">rating</option>*/}
-                    {/*    <option value="created_at">created_at</option>*/}
-                    {/*    <option value="likes">likes</option>*/}
-                    {/*    <option value="dislikes">dislikes</option>*/}
-                    {/*  </select>*/}
-                    {/*</div>*/}
+                    <PostListFilterPanel
+                        q={q}
+                        onChangeQ={setQ}
+                        orderBy={orderBy}
+                        onChangeOrderBy={setOrderBy}
+                        orderDir={orderDir}
+                        onChangeOrderDir={setOrderDir}
+                        categoryId={categoryId}
+                        onChangeCategoryId={setCategoryId}
+                        categories={categories}
+                        catLoading={catLoading}
+                    />
 
                     <PostsList
                         items={items}
