@@ -3,9 +3,6 @@ import type {Profile} from "@features/profiles/types.ts";
 
 
 export default async function updateAvatar(file: File): Promise<Profile> {
-    if (file.type !== "image/png") throw new Error("Only PNG allowed");
-    if (file.size > 10 * 1024 * 1024) throw new Error("Max 10MB");
-
     const form = new FormData();
     form.set("avatar", file);
 

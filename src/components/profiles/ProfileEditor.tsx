@@ -48,6 +48,8 @@ export default function ProfileEditor(props: Props) {
                 avatar = profile.avatar;
             }
         } catch (err: any) {
+            console.error(err);
+
             alert(err.message || "Failed to upload avatar");
         } finally {
             setUploading(false);
