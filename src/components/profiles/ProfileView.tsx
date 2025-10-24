@@ -30,7 +30,7 @@ export default function ProfileView({
                     alt="avatar"
                 />
                 <div className={s.info}>
-                    <div className={s.username}>{username}</div>
+                    <div className={s.username}>@{username}</div>
                     {pseudonym ? <div className={s.pseudonym}>{pseudonym}</div> : null}
                     <div><b>Reputation:</b> {reputation}</div>
                     {created_at ? (

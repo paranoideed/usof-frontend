@@ -52,13 +52,20 @@
   padding: 0;
 }
 
+.link,
+.active {
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
   height: 42px;
-  padding: 0 14px;
   border-radius: 10px;
 
   font-size: var(--nav-font);
@@ -86,4 +93,12 @@
         background: $brand-hover;
         box-shadow: 0 0 0 1px color.adjust($brand-hover, $lightness: -5%) inset;
     }
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+  object-fit: cover;
 }

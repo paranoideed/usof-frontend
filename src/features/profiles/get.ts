@@ -2,17 +2,7 @@ import api from"../api.ts";
 
 import type {Profile} from "@features/profiles/types.ts";
 
-export type MeResponse = {
-    id:         string;
-    username:   string;
-    pseudonym:  string | null;
-    avatar:     string | null;
-    reputation: number;
-    created_at:  Date;
-    updated_at:  Date | null;
-};
-
-export async function getMeProfile(): Promise<MeResponse> {
+export async function getMeProfile(): Promise<Profile> {
     try {
         const { data } = await api.get("/profiles/me");
         return data;

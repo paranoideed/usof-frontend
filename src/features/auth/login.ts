@@ -1,6 +1,10 @@
 import api from "@features/api.ts";
 
-export type UserToken = { token: string };
+export type UserToken = {
+    user_id: string;
+    username: string;
+    token: string
+};
 
 export type LoginInput = {
     identifier: string;

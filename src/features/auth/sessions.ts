@@ -45,3 +45,20 @@ export function isAdmin(): boolean {
     console.log("Current user role:", getCurrentUserRole());
     return getCurrentUserRole() === "admin";
 }
+
+export function saveUsername(username: string): void {
+    try {
+        localStorage.setItem("username", username);
+    } catch (e) {
+        console.error("Could not save username to localStorage", e);
+    }
+}
+
+export function getUsername(): string | null {
+    try {
+        return localStorage.getItem("username");
+    } catch (e) {
+        console.error("Could not retrieve username from localStorage", e);
+        return null;
+    }
+}

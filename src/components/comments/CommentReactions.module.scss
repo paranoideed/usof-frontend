@@ -1,5 +1,5 @@
 @use "../../styles/variables" as *;
-@import "./style/comments.module.scss";
+@use "styles/comments.module.scss";
 
 .reactions {
   display: inline-flex;

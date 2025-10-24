@@ -9,6 +9,10 @@ import { FormError } from "@/components/ui/FormAlert";
 
 import login from "@/features/auth/login";
 
+import {
+    saveUsername,
+} from "@/features/auth/sessions";
+
 import s from "./LoginPage.module.scss";
 
 type FieldErrors = {
@@ -56,8 +60,9 @@ export default function LoginPage() {
                 secure: window.location.protocol === "https:",
             });
 
-            navigate("/profiles/me");
+            saveUsername(data.username);
 
+            navigate("/profiles/me");
         } catch (err: any) {
             const status = err?.response?.status;
             const data = err?.response?.data;

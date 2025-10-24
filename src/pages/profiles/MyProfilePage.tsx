@@ -8,19 +8,19 @@ import ProfileView from "@/components/profiles/ProfileView";
 import ProfileEditor from "@/components/profiles/ProfileEditor";
 import { FormError, FormOk } from "@/components/ui/FormAlert";
 
-import useProfile from "./hooks/useProfile.ts";
+import useMeProfile from "./hooks/useMeProfile.ts";
 
 import logout from "@/features/auth/logout";
 import updateMe from "@features/profiles/update.ts";
 
-import type {MeResponse} from "@features/profiles/get.ts";
-
-import s from "./MyProfilePage.module.scss";
 import AdminCreateUserForm from "@pages/profiles/AdminCreateUserForm.tsx";
 import ResetPasswordForm from "@pages/profiles/ResetPasswordForm.tsx";
 
+import s from "./MyProfilePage.module.scss";
+import type {Profile} from "@features/profiles/types.ts";
+
 export default function MyProfilePage() {
-    const { data, loading, error, status, setData } = useProfile();
+    const { data, loading, error, status, setData } = useMeProfile();
     const [editing, setEditing] = useState(false);
     const [username, setUsername] = useState("");
     const [pseudonym, setPseudonym] = useState("");
@@ -36,8 +36,8 @@ export default function MyProfilePage() {
         if (!data) return;
         setFieldErrors({});
         setOk(null);
-        setUsername((
-            (data as any).username ?? (data as any).login ?? "") as string
+        setUsername(
+            ((data as any).username ?? (data as any).login ?? "") as string
         );
         setPseudonym(((data as any).pseudonym ?? "") as string);
         setEditing(true);
@@ -57,14 +57,30 @@ export default function MyProfilePage() {
         e.preventDefault();
         const next: { username?: string; pseudonym?: string } = {};
         if (!username.trim()) next.username = "This is required";
-        if (username && username.trim().length < 3) next.username = "Min 3 characters";
-        if (Object.keys(next).length) { setFieldErrors(next); return; }
+        if (username && username.trim().length < 3)
+            next.username = "Min 3 characters";
+        if (Object.keys(next).length) {
+            setFieldErrors(next);
+            return;
+        }
 
         try {
             setSaving(true);
-            const updated = await updateMe({ username: username.trim(), pseudonym: pseudonym.trim() || null });
-            setData((prev: MeResponse | null) =>
-                prev ? { ...prev, username: updated.username, pseudonym: (updated as any).pseudonym } : prev
+            const trimmedUsername = username.trim(); // Используем одно и то же значение
+
+            const updated = await updateMe({
+                username: trimmedUsername,
+                pseudonym: pseudonym.trim() || null,
+            });
+
+            setData((prev: Profile | null) =>
+                prev
+                    ? {
+                        ...prev,
+                        username: updated.username,
+                        pseudonym: (updated as any).pseudonym,
+                    }
+                    : prev
             );
             setOk("Profile updated");
             setEditing(false);
@@ -73,10 +89,13 @@ export default function MyProfilePage() {
             const d = err?.response?.data;
             if (status === 400 && d && typeof d === "object") {
                 const props = d.properties || {};
-                const first = (arr: unknown) => (Array.isArray(arr) && arr.length ? String(arr[0]) : undefined);
+                const first = (arr: unknown) =>
+                    Array.isArray(arr) && arr.length ? String(arr[0]) : undefined;
                 const fe: { username?: string; pseudonym?: string } = {};
-                if (props.username?.errors) fe.username = first(props.username.errors);
-                if (props.pseudonym?.errors) fe.pseudonym = first(props.pseudonym.errors);
+                if (props.username?.errors)
+                    fe.username = first(props.username.errors);
+                if (props.pseudonym?.errors)
+                    fe.pseudonym = first(props.pseudonym.errors);
                 if (Object.keys(fe).length) setFieldErrors(fe);
             } else {
                 alert(d?.message || d?.error || err?.message || "Update failed");
@@ -98,7 +117,11 @@ export default function MyProfilePage() {
                     <>
                         <FormError>{error}</FormError>
                         <div className={s.actions}>
-                            {status === 401 && <Button onClick={() => navigate("/login")}>Back to Login</Button>}
+                            {status === 401 && (
+                                <Button onClick={() => navigate("/login")}>
+                                    Back to Login
+                                </Button>
+                            )}
                         </div>
                     </>
                 )}
@@ -111,27 +134,38 @@ export default function MyProfilePage() {
                             user_id={data.id}
                             username={(data as any).username ?? (data as any).login}
                             pseudonym={(data as any).pseudonym}
-                            reputation={"reputation" in (data as any) ? (data as any).reputation : null}
+                            reputation={
+                                "reputation" in (data as any)
+                                    ? (data as any).reputation
+                                    : null
+                            }
                             created_at={data.created_at}
                             actions={
                                 <>
                                     <Button onClick={startEdit}>Edit</Button>
                                     <Button onClick={userLogout}>Logout</Button>
-                                    <Button onClick={() => setResetOpen(v => !v)}>
+                                    <Button onClick={() => setResetOpen((v) => !v)}>
                                         {resetOpen ? "Close reset" : "Reset password"}
                                     </Button>
-                                    {((data as any).role === "admin") && (
+                                    {(data as any).role === "admin" && (
                                         <Button onClick={() => setCreateOpen((v) => !v)}>
-                                            {createOpen ? "Close create form" : "Create user"}
+                                            {createOpen
+                                                ? "Close create form"
+                                                : "Create user"}
                                         </Button>
                                     )}
                                 </>
                             }
                         />
-                        {((data as any).role === "admin") && createOpen && (
-                            <AdminCreateUserForm onSuccess={() => {}} onCancel={() => setCreateOpen(false)} />
+                        {(data as any).role === "admin" && createOpen && (
+                            <AdminCreateUserForm
+                                onSuccess={() => {}}
+                                onCancel={() => setCreateOpen(false)}
+                            />
                         )}
-                        {resetOpen && <ResetPasswordForm onCancel={() => setResetOpen(false)} />}
+                        {resetOpen && (
+                            <ResetPasswordForm onCancel={() => setResetOpen(false)} />
+                        )}
                     </>
                 )}
 

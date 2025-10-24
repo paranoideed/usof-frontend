@@ -1,10 +1,17 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 
-import { getMeProfile, type MeResponse } from "@features/profiles/get.ts";
+import { getMeProfile } from "@features/profiles/get.ts";
+import type {Profile} from "@features/profiles/types.ts";
 
-export default function useProfile() {
-    const [data, setData] = useState<MeResponse | null>(null);
+export default function useMeProfile() : {
+    data:    Profile | null;
+    loading: boolean;
+    error:   string | null;
+    status:  number | null;
+    setData: React.Dispatch<React.SetStateAction<Profile | null>>;
+} {
+    const [data, setData] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [status, setStatus] = useState<number | null>(null);
@@ -38,11 +45,11 @@ export default function useProfile() {
     }, []);
 
     return { data, loading, error, status, setData } as {
-        data: MeResponse | null;
+        data: Profile | null;
         loading: boolean;
         error: string | null;
         status: number | null;
-        setData: React.Dispatch<React.SetStateAction<MeResponse | null>>;
+        setData: React.Dispatch<React.SetStateAction<Profile | null>>;
     };
 }
 

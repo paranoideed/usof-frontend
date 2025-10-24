@@ -96,9 +96,10 @@ export default function PostsFeedPage() {
 
                     <select className={s.btn} value={orderBy} onChange={(e) => setOrderBy(e.currentTarget.value as any)}>
                         <option value="rating">rating</option>
-                        <option value="created_at">newest</option>
-                        <option value="likes">most likes</option>
-                        <option value="dislikes">most dislikes</option>
+                        <option value="newest">newest</option>
+                        <option value="oldest">oldest</option>
+                        <option value="likes">likes</option>
+                        <option value="dislikes">dislikes</option>
                     </select>
 
                     <select

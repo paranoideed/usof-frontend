@@ -3,9 +3,12 @@ import {useEffect, useState} from "react";
 import type {Profile} from "@features/profiles/types.ts";
 import {getProfileById, getProfileByUsername} from "@features/profiles/get.ts";
 
-type Params = { id?: string | null; username?: string | null };
-
-export default function useProfileBy({ id, username }: Params) {
+export default function useProfileBy(userId?: string, username?: string) : {
+    data:    Profile | null;
+    loading: boolean;
+    error:   string | null;
+    status:  number | null;
+} {
     const [data, setData] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -17,13 +20,13 @@ export default function useProfileBy({ id, username }: Params) {
         setError(null);
         setStatus(null);
 
-        const key = (id ?? "").trim() || (username ?? "").trim();
+        const key = (userId ?? "").trim() || (username ?? "").trim();
         if (!key) return;
 
         setLoading(true);
         (async () => {
             try {
-                const user = id ? await getProfileById(id) : await getProfileByUsername(username!);
+                const user = userId ? await getProfileById(userId) : await getProfileByUsername(username!);
                 if (!alive) return;
                 setData(user);
             } catch (err: any) {
@@ -41,7 +44,7 @@ export default function useProfileBy({ id, username }: Params) {
         })();
 
         return () => { alive = false; };
-    }, [id, username]);
+    }, [userId, username]);
 
     return { data, loading, error, status };
 }

@@ -9,8 +9,11 @@ import useProfileBy from "./hooks/useProfileBy";
 import s from "./UserProfile.module.scss";
 
 export default function UserProfilePage() {
-    const { user_id, username } = useParams<{ user_id?: string; username?: string }>();
-    const { data, loading, error, status } = useProfileBy({ id: user_id ?? null, username: username ?? null });
+    const params = useParams();
+    const userId = params.user_id;
+    const username = params.username;
+
+    const { data, loading, error, status } = useProfileBy(userId, username);
 
     if (loading) return <div className={s.root}>Loading…</div>;
 
@@ -18,7 +21,7 @@ export default function UserProfilePage() {
         <div className={s.root}>
             <NavBar />
             <div className={s.card}>
-                {(!user_id && !username) && (
+                {(!userId && !username) && (
                     <FormError>Neither user_id nor username provided</FormError>
                 )}
 
@@ -28,7 +31,7 @@ export default function UserProfilePage() {
 
                 {data && (
                     <ProfileView
-                        avatar={data.avatar}
+                        user_id={data.id}
                         username={data.username}
                         pseudonym={data.pseudonym ?? undefined}
                         reputation={data.reputation}

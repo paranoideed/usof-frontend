@@ -1,4 +1,5 @@
 import api from"../api.ts";
+import {saveUsername} from "@features/auth/sessions.ts";
 
 export type UpdateMeInput = {
     username?: string;
@@ -14,6 +15,7 @@ export type UpdateMeResponse = {
 export default async function updateMe(input: UpdateMeInput): Promise<UpdateMeResponse> {
     try {
         const { data } = await api.post("/profiles/me", input);
+        saveUsername(data.username);
         return data;
     } catch (error: any) {
         if (error.response) throw error;

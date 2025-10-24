@@ -4,10 +4,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { isAdmin } from "@/features/auth/sessions";
 import { updateCategory } from "@features/categories/update.ts";
 import { createCategory } from "@features/categories/create.ts";
-import { listCategories } from "@features/categories/list.ts";
+import getCategory from "@features/categories/get.ts";
+
+import Button from "@components/ui/Button.tsx";
 
 import s from "./CategoryFormPage.module.scss";
-import Button from "@components/ui/Button.tsx";
 
 export default function CategoryFormPage() {
     const { id } = useParams();
@@ -21,17 +22,12 @@ export default function CategoryFormPage() {
     const [error, setError] = React.useState<string | null>(null);
 
     React.useEffect(() => {
-        if (!editing) return;
+        if (!editing || !id) return;
         setLoading(true);
-        listCategories({ limit: 1000, offset: 0 })
-            .then((res) => {
-                const found = res.data.find((x) => x.id === id);
-                if (found) {
-                    setTitle(found.title);
-                    setDescription(found.description);
-                } else {
-                    setError("Category not found");
-                }
+        getCategory(id)
+            .then((cat) => {
+                setTitle(cat.title ?? "");
+                setDescription(cat.description ?? "");
             })
             .catch((e) => setError(e?.message || String(e)))
             .finally(() => setLoading(false));
@@ -94,7 +90,7 @@ export default function CategoryFormPage() {
 
                     <div className={s.actions}>
                         <Button type="submit" disabled={loading}>
-                            {loading ? "Creating…" : "Create"}
+                            {loading ? "Save…" : "Save"}
                         </Button>
 
                         <Button type="button" onClick={() => navigate(-1)} disabled={loading}>
