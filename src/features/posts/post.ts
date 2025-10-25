@@ -1,4 +1,4 @@
-import type {CategoryData} from "@features/categories/create.ts";
+import type {CategoryData} from "@features/categories/category.ts";
 
 export type Post = {
     data: {

@@ -1,5 +1,5 @@
 import api from "../api.ts";
-import type {Profile} from "@features/profiles/types.ts";
+import type {Profile} from "@features/profiles/profile.ts";
 import {saveAvatar} from "@features/auth/sessions.ts";
 
 export default async function updateAvatar(file: File): Promise<Profile> {
@@ -8,9 +8,6 @@ export default async function updateAvatar(file: File): Promise<Profile> {
 
     try {
         const { data } = await api.post("/profiles/me/avatar", form);
-
-        console.log(data);
-
         saveAvatar(data.avatar_url);
 
         return data;

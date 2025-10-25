@@ -1,28 +1,47 @@
+// useMeProfile.ts
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { getMeProfile } from "@features/profiles/get";
+import type { Profile } from "@features/profiles/profile.ts";
 
-import { getMeProfile } from "@features/profiles/get.ts";
-import type {Profile} from "@features/profiles/types.ts";
-
-export default function useMeProfile() : {
-    data:    Profile | null;
+export default function useMeProfile(): {
+    data: Profile | null;
     loading: boolean;
-    error:   string | null;
-    status:  number | null;
+    error: string | null;
+    status: number | null;
     setData: React.Dispatch<React.SetStateAction<Profile | null>>;
+    reload: () => Promise<void>;               // <-- добавить в тип
 } {
-    const [data, setData] = useState<Profile | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [status, setStatus] = useState<number | null>(null);
+    const [data, setData] = React.useState<Profile | null>(null);
+    const [loading, setLoading] = React.useState(false);
+    const [error, setError] = React.useState<string | null>(null);
+    const [status, setStatus] = React.useState<number | null>(null);
 
-    useEffect(() => {
-        let alive = true;
+    const reload = React.useCallback(async () => { // <-- добавить функцию
         setLoading(true);
         setError(null);
         setStatus(null);
+        try {
+            const me = await getMeProfile();
+            setData(me);
+        } catch (err: any) {
+            setStatus(err?.response?.status ?? null);
+            setError(
+                err?.response?.data?.message ||
+                err?.response?.data?.error ||
+                err?.message ||
+                "Failed to load profiles"
+            );
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
+    React.useEffect(() => {
+        let alive = true;
         (async () => {
+            setLoading(true);
+            setError(null);
+            setStatus(null);
             try {
                 const me = await getMeProfile();
                 if (!alive) return;
@@ -40,18 +59,8 @@ export default function useMeProfile() : {
                 alive && setLoading(false);
             }
         })();
-
         return () => { alive = false; };
     }, []);
 
-    console.log("useMeProfile:", { data, loading, error, status });
-
-    return { data, loading, error, status, setData } as {
-        data: Profile | null;
-        loading: boolean;
-        error: string | null;
-        status: number | null;
-        setData: React.Dispatch<React.SetStateAction<Profile | null>>;
-    };
+    return { data, loading, error, status, setData, reload }; // <-- вернуть reload
 }
-

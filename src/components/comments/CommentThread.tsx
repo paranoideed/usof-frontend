@@ -12,6 +12,7 @@ import type { Comment } from "@features/comments/comment.ts";
 import { ReplyContext } from "@/components/comments/CommentsSection";
 
 import s from "./CommentThread.module.scss";
+import LoginRequiredModal from "@components/ui/LoginRequiredModal.tsx";
 
 const PAGE_SIZE = 10;
 const CAP_DEPTH = 4;          // глубина, после которой визуально не сдвигаем
@@ -36,9 +37,9 @@ export default function CommentThread({ postId, comment, depth = 0, replies, onD
     const [rTotal, setRTotal] = React.useState<number | null>(null);
     const [loadingReplies, setLoadingReplies] = React.useState(false);
     const [loadingMore, setLoadingMore] = React.useState(false);
-
     const [deleting, setDeleting] = React.useState(false);
     const [deleteErr, setDeleteErr] = React.useState<string | null>(null);
+    const [loginOpen, setLoginOpen] = React.useState(false);
 
     const meId = getCurrentUserId();
     const role = getCurrentUserRole();
@@ -53,6 +54,14 @@ export default function CommentThread({ postId, comment, depth = 0, replies, onD
     const hasMoreReplies = typeof rTotal === "number"
         ? repliesState.length < rTotal
         : repliesState.length !== 0 && repliesState.length % PAGE_SIZE === 0;
+
+    function ensureAuth(): boolean {
+        if (!meId) {
+            setLoginOpen(true);
+            return false;
+        }
+        return true;
+    }
 
     const ensureLoadReplies = async () => {
         if (loadingReplies || repliesState.length > 0 || rOffset > 0) return;
@@ -98,6 +107,8 @@ export default function CommentThread({ postId, comment, depth = 0, replies, onD
 
     const reply = React.useContext(ReplyContext);
     const openReplyDock = () => {
+        if (!ensureAuth()) return;
+
         reply.open({
             postId,
             parent: comment,
@@ -211,6 +222,7 @@ export default function CommentThread({ postId, comment, depth = 0, replies, onD
                     )}
                 </div>
             )}
+            <LoginRequiredModal open={loginOpen} onClose={() => setLoginOpen(false)} />
         </li>
     );
 }

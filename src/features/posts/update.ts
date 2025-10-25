@@ -59,6 +59,6 @@ export async function updatePostStatus(input: {
         },
     };
 
-    const res = await api.put<Post>(`/posts/${input.postId}`, payload);
+    const res = await api.patch<Post>(`/posts/${input.postId}/status`, payload);
     return res.data;
 }

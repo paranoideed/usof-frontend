@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 
-import type {Profile} from "@features/profiles/types.ts";
+import type {Profile} from "@features/profiles/profile.ts";
 import {getProfileById, getProfileByUsername} from "@features/profiles/get.ts";
 
 export default function useProfileBy(userId?: string, username?: string) : {

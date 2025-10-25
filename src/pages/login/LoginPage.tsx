@@ -141,6 +141,12 @@ export default function LoginPage() {
                     Don't have an account? Register!
                 </Link>
             </div>
+
+            <div className={s.under_card}>
+                <Link to="/posts" className={s.link}>
+                    Continue like a guest
+                </Link>
+            </div>
         </div>
     );
 }

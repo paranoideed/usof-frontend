@@ -1,6 +1,6 @@
 import api from"../api.ts";
 
-import type {ProfileList} from "./types.ts";
+import type {ProfileList} from "./profile.ts";
 
 export type SearchProfilesParams = {
     username: string;

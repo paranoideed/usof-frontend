@@ -12,22 +12,22 @@ type Props = {
     loadMore: () => void;
 }
 
-export default function PostsList({ items, loading, hasMore, loadMore }: Props) {
+export default function PostsList(params: Props) {
     return (
         <div>
             <div className={s.list}>
-                {items.map((p) => (
+                {params.items.map((p) => (
                     <PostSmall key={p.data.id} post={p} />
                 ))}
             </div>
 
             <div className={s.loader}>
-                {loading && <div>Loading…</div>}
-                {!loading && hasMore && (
-                    <SecondButton onClick={loadMore}>Show More</SecondButton>
+                {params.loading && <div>Loading…</div>}
+                {!params.loading && params.hasMore && (
+                    <SecondButton onClick={params.loadMore}>Show More</SecondButton>
                 )}
 
-                {!loading && !hasMore && items.length > 0 && <div>No more posts</div>}
+                {!params.loading && !params.hasMore && params.items.length > 0 && <div>No more posts</div>}
             </div>
         </div>
     )

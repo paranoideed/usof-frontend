@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { list  } from "@features/profiles/list.ts";
-import type {ProfileList} from "@features/profiles/types.ts";
+import type {ProfileList} from "@features/profiles/profile.ts";
 
 function useDebounced<T>(value: T, delay = 350): T {
     const [v, setV] = useState(value);

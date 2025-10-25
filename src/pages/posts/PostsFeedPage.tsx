@@ -13,6 +13,7 @@ import type { ListPostsParams } from "@features/posts/list.ts";
 import s from "@/pages/posts/PostsFeedPage.module.scss";
 import PostsList from "@components/posts/PostsList.tsx";
 import PostListFilterPanel, { type CategoryRow } from "@components/posts/PostListFilterPanel";
+import {getCurrentUserId} from "@features/auth/sessions.ts";
 
 export function useCategories() {
     const [items, setItems] = React.useState<CategoryRow[]>([]);
@@ -59,8 +60,7 @@ export default function PostsFeedPage() {
     const initialCat = searchParams.get("category") ?? "";
 
     const [q, setQ] = React.useState("");
-    const [orderBy, setOrderBy] =
-        React.useState<"rating" | "created_at" | "likes" | "dislikes">("rating");
+    const [orderBy, setOrderBy] = React.useState<"rating" | "created_at" | "likes" | "dislikes">("rating");
     const [orderDir, setOrderDir] = React.useState<"asc" | "desc">("desc");
     const [createOpen, setCreateOpen] = React.useState(false);
     const [categoryId, setCategoryId] = React.useState<string>(initialCat);
@@ -75,7 +75,9 @@ export default function PostsFeedPage() {
         if (categoryId) next.set("category", categoryId);
         else next.delete("category");
         setSearchParams(next, { replace: true });
-    }, [categoryId]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [categoryId]);
+
+    const userId = getCurrentUserId()
 
     const {
         items: categories,
@@ -128,7 +130,7 @@ export default function PostsFeedPage() {
                     loadMore={loadMore}
                 />
 
-                <Fab onClick={() => setCreateOpen(true)} title="Create post" />
+                {userId && <Fab onClick={() => setCreateOpen(true)} title="Create post" />}
             </div>
 
             <CreatePostModal

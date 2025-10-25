@@ -17,6 +17,7 @@ type Props = {
     onChangePseudonym: (v: string) => void;
     onCancel: () => void;
     onSubmit: (e: React.FormEvent) => void;
+    onAvatarUpdated?: (url: string) => void; // <-- ДОБАВИТЬ
 };
 
 export default function ProfileEditor(props: Props) {
@@ -30,11 +31,19 @@ export default function ProfileEditor(props: Props) {
         onChangePseudonym,
         onCancel,
         onSubmit,
+        onAvatarUpdated, // <-- ДОБАВИТЬ
     } = props;
 
     const [uploading, setUploading] = React.useState(false);
     const fileRef = React.useRef<HTMLInputElement>(null);
-    let   avatar = getUserPic(avatarUrl);
+
+    // локальный state для мгновенного обновления превью
+    const [avatar, setAvatar] = React.useState<string>(() => getUserPic(avatarUrl));
+
+    React.useEffect(() => {
+        // если родитель обновил avatarUrl — синхронизируемся
+        setAvatar(getUserPic(avatarUrl));
+    }, [avatarUrl]);
 
     async function onAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
@@ -42,14 +51,14 @@ export default function ProfileEditor(props: Props) {
 
         try {
             setUploading(true);
-
             const profile = await updateAvatar(file);
-            if (profile.data.attributes.avatar_url) {
-                avatar = profile.data.attributes.avatar_url;
+            const newUrl = profile.data.attributes?.avatar_url;
+            if (newUrl) {
+                setAvatar(getUserPic(newUrl));   // локальный превью
+                onAvatarUpdated?.(newUrl);       // <-- УВЕДОМИТЬ РОДИТЕЛЯ
             }
         } catch (err: any) {
             console.error(err);
-
             alert(err.message || "Failed to upload avatar");
         } finally {
             setUploading(false);

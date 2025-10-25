@@ -11,12 +11,12 @@ import { fetchCommentsByParent } from "@features/comments/list.ts";
 import type { Comment } from "@features/comments/comment.ts";
 
 import s from "./CommentsSection.module.scss";
+import LoginRequiredModal from "@components/ui/LoginRequiredModal.tsx";
 
-/** ====== Reply Context (управляет док-композером) ====== */
 type ReplyTarget = {
     postId: string;
     parent: Comment;
-    onCreated?: (c: Comment) => void; // колбек, чтобы ветка родителя обновилась локально
+    onCreated?: (c: Comment) => void;
 } | null;
 
 type ReplyCtx = {
@@ -45,12 +45,13 @@ export default function CommentsSection({ postId }: Props) {
     const [total, setTotal] = React.useState<number | null>(null);
     const [loadingMore, setLoadingMore] = React.useState(false);
 
-    // ==== reply dock state ====
     const [replyTarget, setReplyTarget] = React.useState<ReplyTarget>(null);
     const [replyValue, setReplyValue] = React.useState("");
     const [replyErr, setReplyErr] = React.useState<string | null>(null);
     const [posting, setPosting] = React.useState(false);
+    const [loginOpen, setLoginOpen] = React.useState(false);
 
+    const meId = getCurrentUserId();
     const hasMore = total !== null
         ? items.length < total
         : items.length % PAGE_SIZE === 0 && items.length !== 0;
@@ -75,6 +76,14 @@ export default function CommentsSection({ postId }: Props) {
         return () => { ignore = true; };
     }, [postId]);
 
+    function ensureAuth(): boolean {
+        if (!meId) {
+            setLoginOpen(true);
+            return false;
+        }
+        return true;
+    }
+
     const loadMore = async () => {
         if (loadingMore) return;
         setLoadingMore(true);
@@ -86,7 +95,6 @@ export default function CommentsSection({ postId }: Props) {
         } finally { setLoadingMore(false); }
     };
 
-    // ==== reply dock actions ====
     const openReply: ReplyCtx["open"] = (t) => {
         if (!t) return;
         setReplyTarget(t);
@@ -100,7 +108,9 @@ export default function CommentsSection({ postId }: Props) {
     };
 
     const submitReply = async (e: React.FormEvent) => {
-        e.preventDefault();
+        e.preventDefault();              // ← перенесли вверх
+        if (!ensureAuth()) return;       // ← теперь модалка откроется без сабмита формы
+
         if (!replyTarget) return;
 
         setReplyErr(null);
@@ -123,7 +133,6 @@ export default function CommentsSection({ postId }: Props) {
             });
 
             replyTarget.onCreated?.(created);
-
             closeReply();
         } catch (e: any) {
             setReplyErr(e?.response?.data?.error ?? e?.message ?? "Failed to send reply");
@@ -132,18 +141,21 @@ export default function CommentsSection({ postId }: Props) {
         }
     };
 
+    const requireLogin = React.useCallback(() => setLoginOpen(true), []);
+
     return (
         <ReplyContext.Provider value={{ target: replyTarget, open: openReply, close: closeReply }}>
             <div className={s.root}>
                 <h3 className={s.title}>Comments</h3>
 
-                <RootComposer
+                {meId && <RootComposer
                     postId={postId}
                     onCreated={(created) => {
                         setItems((prev) => [created, ...prev]);
                         setTotal((t) => (typeof t === "number" ? t + 1 : t));
                     }}
-                />
+                    requireLogin={requireLogin}
+                />}
 
                 {loading ? (
                     <div className={s.loading}>Loading…</div>
@@ -177,21 +189,20 @@ export default function CommentsSection({ postId }: Props) {
                                 </div>
                                 {typeof total === "number" && (
                                     <span className={s.totalHint}>
-                    Показано {items.length} из {total}
-                  </span>
+                                        Показано {items.length} из {total}
+                                    </span>
                                 )}
                             </div>
                         )}
                     </>
                 )}
 
-                {/* ==== DOCK REPLY COMPOSER ==== */}
                 {replyTarget && (
                     <form className={s.replyDock} onSubmit={submitReply}>
                         <div className={s.replyDockHeader}>
-                <span className={s.replyDockTitle}>
-                    Replying to <strong>@{replyTarget.parent.data.attributes.author_username}</strong>
-                        </span>
+                            <span className={s.replyDockTitle}>
+                                Replying to <strong>@{replyTarget.parent.data.attributes.author_username}</strong>
+                            </span>
                             <button type="button" className={s.replyDockClose} onClick={closeReply} aria-label="Close reply">
                                 ✕
                             </button>
@@ -215,19 +226,28 @@ export default function CommentsSection({ postId }: Props) {
                         {replyErr && <div className={s.fieldErr}>{replyErr}</div>}
                     </form>
                 )}
+
+                <LoginRequiredModal open={loginOpen} onClose={() => setLoginOpen(false)} />
             </div>
         </ReplyContext.Provider>
     );
 }
 
-/** Отдельная форма для корневых комментариев (осталась вверху, как раньше) */
-function RootComposer({ postId, onCreated }: { postId: string; onCreated: (c: Comment) => void }) {
+function RootComposer({
+    postId,
+    onCreated,
+    requireLogin,                           // ← новый проп
+}: {
+    postId: string;
+    onCreated: (c: Comment) => void;
+    requireLogin: () => void;
+}) {
     const [value, setValue] = React.useState("");
     const [posting, setPosting] = React.useState(false);
     const [fieldErr, setFieldErr] = React.useState<string | null>(null);
 
     const onSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+        e.preventDefault();                   // ← всегда отменяем дефолт
         setFieldErr(null);
 
         const parsed = ContentSchema.safeParse(value.trim());
@@ -235,8 +255,12 @@ function RootComposer({ postId, onCreated }: { postId: string; onCreated: (c: Co
             setFieldErr(parsed.error.issues[0]?.message ?? "Неверный текст");
             return;
         }
+
         const authorId = getCurrentUserId();
-        if (!authorId) { setFieldErr("Нужно войти, чтобы комментировать"); return; }
+        if (!authorId) {
+            requireLogin();                     // ← открываем модалку
+            return;
+        }
 
         setPosting(true);
         try {
@@ -256,14 +280,14 @@ function RootComposer({ postId, onCreated }: { postId: string; onCreated: (c: Co
 
     return (
         <form className={s.form} onSubmit={onSubmit}>
-      <textarea
-          className={s.textarea}
-          value={value}
-          onChange={(e) => setValue(e.currentTarget.value)}
-          placeholder="Write comment…"
-          maxLength={1000}
-          rows={4}
-      />
+            <textarea
+                className={s.textarea}
+                value={value}
+                onChange={(e) => setValue(e.currentTarget.value)}
+                placeholder="Write comment…"
+                maxLength={1000}
+                rows={4}
+            />
             <div className={s.formBar}>
                 <span className={s.counter}>{value.length}/1000</span>
                 <div>

@@ -21,6 +21,7 @@ import { type Post } from "@/features/posts/post";
 import s from "@components/posts/PostFull.module.scss";
 import getUserPic from "@features/ui.ts";
 import AvatarImg from "@components/ui/AvatarImg.tsx";
+import LoginRequiredModal from "@components/ui/LoginRequiredModal.tsx";
 
 export default function PostFull(props: Post) {
     const navigate = useNavigate();
@@ -30,12 +31,7 @@ export default function PostFull(props: Post) {
     const [myReaction, setMyReaction] = React.useState<MyReaction>(parseMyReaction(props.data.attributes.user_reaction));
     const [busy, setBusy] = React.useState(false);
     const [editOpen, setEditOpen] = React.useState(false);
-
-    React.useEffect(() => {
-        setPost(props.data);
-        setCats(props.data.attributes.categories ?? []);
-        setMyReaction(parseMyReaction(props.data.attributes.user_reaction));
-    }, [props.data, props.data.attributes.categories, props.data.attributes.user_reaction]);
+    const [loginOpen, setLoginOpen] = React.useState(false);
 
     const meId = getCurrentUserId();
     const meRole = getCurrentUserRole();
@@ -44,7 +40,12 @@ export default function PostFull(props: Post) {
     const canEdit = Boolean(meId && meId === post.attributes.author_id);
 
     const isClosed = post.attributes.status === "closed";
-    const nextStatus = isClosed ? "active" : "closed";
+
+    React.useEffect(() => {
+        setPost(props.data);
+        setCats(props.data.attributes.categories ?? []);
+        setMyReaction(parseMyReaction(props.data.attributes.user_reaction));
+    }, [props.data, props.data.attributes.categories, props.data.attributes.user_reaction]);
 
     async function refreshFromServer() {
         const fresh = await getPost(post.id);
@@ -53,11 +54,21 @@ export default function PostFull(props: Post) {
         setMyReaction(parseMyReaction(fresh.data.attributes.user_reaction));
     }
 
+    function ensureAuth(): boolean {
+        if (!meId) {
+            setLoginOpen(true);
+            return false;
+        }
+        return true;
+    }
+
     async function onLike() {
+        if (!ensureAuth()) return;
+
         if (busy) return;
         setBusy(true);
         const prev = myReaction;
-        setMyReaction(prev === "like" ? null : "like"); // оптимистично
+        setMyReaction(prev === "like" ? null : "like");
         try {
             if (prev === "like") await unlikePost(post.id);
             else await likePost(post.id, "like");
@@ -67,7 +78,10 @@ export default function PostFull(props: Post) {
         }
     }
 
+
     async function onDislike() {
+        if (!ensureAuth()) return;
+
         if (busy) return;
         setBusy(true);
         const prev = myReaction;
@@ -98,15 +112,33 @@ export default function PostFull(props: Post) {
     async function onToggleStatus() {
         if (!canManage || busy) return;
         setBusy(true);
+
         const prev = post.attributes.status;
-        setPost((p) => ({ ...p, status: nextStatus })); // оптимистичный апдейт
+        const optimistic = post.attributes.status === "closed" ? "active" : "closed";
+
+        setPost(p => ({
+            ...p,
+            attributes: {
+                ...p.attributes,
+                status: optimistic,
+            },
+        }));
+
         try {
             await updatePostStatus({
                 postId: post.id,
-                status: nextStatus,
+                status: optimistic,
             });
+
+            await refreshFromServer();
         } catch {
-            setPost((p) => ({ ...p, status: prev })); // откат
+            setPost(p => ({
+                ...p,
+                attributes: {
+                    ...p.attributes,
+                    status: prev,
+                },
+            }));
             alert("Cannot update post status");
         } finally {
             setBusy(false);
@@ -146,13 +178,13 @@ export default function PostFull(props: Post) {
                                     key={c.id}
                                     type="button"
                                     className={s.category}
-                                    title={c.description || c.title}
+                                    title={c.attributes.description || c.attributes.title}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         goToCategory(c.id);
                                     }}
                                 >
-                                    #{c.title}
+                                    #{c.attributes.title}
                                 </button>
                             ))}
                         </div>
@@ -215,17 +247,18 @@ export default function PostFull(props: Post) {
                     onClose={() => setEditOpen(false)}
                     onUpdated={(updated) => {
                         setPost(updated.data);
-                        setCats(updated.categories ?? []);
-                        setMyReaction(parseMyReaction(updated.user_reaction));
+                        setCats(updated.data.attributes.categories ?? []);
+                        setMyReaction(parseMyReaction(updated.data.attributes.user_reaction));
                         setEditOpen(false);
                     }}
                     postId={post.id}
                     initialTitle={post.attributes.title}
                     initialContent={post.attributes.content}
-                    initialCategories={cats ?? []}
+                    initialCategories={cats.map(c => c.id)}
                 />
             )}
 
+            <LoginRequiredModal open={loginOpen} onClose={() => setLoginOpen(false)} />
             <hr />
         </div>
     );

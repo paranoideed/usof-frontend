@@ -13,22 +13,23 @@ type Props = {
     post: Post;
 };
 
-export default function PostSmall({ post }: Props) {
+export default function PostSmall(params: Props) {
     const navigate = useNavigate();
-    const username = post.data.attributes.author_username;
 
-    const rating =
-        (post.data.attributes.likes ?? 0) - (post.data.attributes.dislikes ?? 0);
+    const username = params.post.data.attributes.author_username;
+    const avatarUrl = params.post.data.attributes.author_avatar_url;
+    const title = params.post.data.attributes.title;
+    const createdAt = params.post.data.attributes.created_at;
+    const content = params.post.data.attributes.content;
+    const rating = (params.post.data.attributes.likes ?? 0) - (params.post.data.attributes.dislikes ?? 0);
 
-    const goToPost = () => navigate(`/posts/${post.data.id}`);
+    const goToPost = () => navigate(`/posts/${params.post.data.id}`);
     const onKeyDownRoot = (e: React.KeyboardEvent) => {
         if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             goToPost();
         }
     };
-
-    console.log("avatar url:", post.data.attributes.author_avatar_url);
 
     return (
     <article className={s.container}>
@@ -41,7 +42,7 @@ export default function PostSmall({ post }: Props) {
         >
             <div className={s.header}>
                 <div>
-                    <AvatarImg className={s.avatar} src={getUserPic(post.data.attributes.author_avatar_url)} alt="avatar" />
+                    <AvatarImg className={s.avatar} src={getUserPic(avatarUrl)} alt="avatar" />
                 </div>
                 <div className={s.meta}>
                     <div className={s.username}>
@@ -54,18 +55,16 @@ export default function PostSmall({ post }: Props) {
                         </Link>
                     </div>
                     <div className={s.date}>
-                        {new Date(post.data.attributes.created_at).toDateString().slice(3)}
+                        {new Date(createdAt).toDateString().slice(3)}
                     </div>
                 </div>
             </div>
 
-            <div className={s.title}>{post.data.attributes.title}</div>
+            <div className={s.title}>{title}</div>
 
-            {post.data.attributes.content && (
+            {content && (
                 <div className={s.content}>
-                    {post.data.attributes.content.length > 220
-                        ? post.data.attributes.content.slice(0, 220) + "…"
-                        : post.data.attributes.content}
+                    {content.length > 220 ? content.slice(0, 220) + "…" : content}
                 </div>
             )}
         </div>

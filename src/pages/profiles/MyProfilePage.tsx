@@ -17,18 +17,17 @@ import AdminCreateUserForm from "@pages/profiles/AdminCreateUserForm.tsx";
 import ResetPasswordForm from "@pages/profiles/ResetPasswordForm.tsx";
 
 import s from "./MyProfilePage.module.scss";
-import type { Profile } from "@features/profiles/types.ts";
+import getUserPic from "@features/ui.ts";
 
 export default function MyProfilePage() {
-    const { data, loading, error, status, setData } = useMeProfile();
+    const { data, loading, error, status, setData, reload } = useMeProfile();
+
     const [editing, setEditing] = useState(false);
     const [username, setUsername] = useState("");
     const [pseudonym, setPseudonym] = useState("");
     const [fieldErrors, setFieldErrors] = useState<{ username?: string; pseudonym?: string }>({});
     const [saving, setSaving] = useState(false);
     const [ok, setOk] = useState<string | null>(null);
-
-    // создание нового юзера по-прежнему по кнопке (для админа)
     const [createOpen, setCreateOpen] = useState(false);
 
     const navigate = useNavigate();
@@ -37,51 +36,51 @@ export default function MyProfilePage() {
         if (!data) return;
         setFieldErrors({});
         setOk(null);
-        setUsername(((data as any).username ?? (data as any).login ?? "") as string);
-        setPseudonym(((data as any).pseudonym ?? "") as string);
+        const attrs = (data as any)?.data?.attributes ?? (data as any);
+        setUsername(String(attrs.username ?? attrs.login ?? ""));
+        setPseudonym(String(attrs.pseudonym ?? ""));
         setEditing(true);
     };
 
-    const cancelEdit = () => {
-        setEditing(false);
-        setFieldErrors({});
-        setOk(null);
-    };
+    const cancelEdit = () => { setEditing(false); setFieldErrors({}); setOk(null); };
 
-    const userLogout = () => {
-        logout().finally(() => navigate("/login", { replace: true }));
-    };
+    const userLogout = () => { logout().finally(() => navigate("/login", { replace: true })); };
 
     const onSave = async (e: React.FormEvent) => {
         e.preventDefault();
         const next: { username?: string; pseudonym?: string } = {};
         if (!username.trim()) next.username = "This is required";
         if (username && username.trim().length < 3) next.username = "Min 3 characters";
-        if (Object.keys(next).length) {
-            setFieldErrors(next);
-            return;
-        }
+        if (Object.keys(next).length) { setFieldErrors(next); return; }
 
         try {
             setSaving(true);
-            const trimmedUsername = username.trim();
-
             const updated = await updateMe({
-                username: trimmedUsername,
+                username: username.trim(),
                 pseudonym: pseudonym.trim() || null,
             });
 
-            setData((prev: Profile | null) =>
+            const attrs = updated.data.attributes;
+            setData(prev =>
                 prev
                     ? {
                         ...prev,
-                        username: updated.username,
-                        pseudonym: (updated as any).pseudonym,
+                        data: {
+                            ...(prev as any).data,
+                            attributes: {
+                                ...(prev as any).data?.attributes,
+                                username: attrs.username,
+                                pseudonym: attrs.pseudonym ?? null,
+                            },
+                        },
                     }
                     : prev
             );
+
             setOk("Profile updated");
             setEditing(false);
+
+            void reload();
         } catch (err: any) {
             const status = err?.response?.status;
             const d = err?.response?.data;
@@ -100,6 +99,24 @@ export default function MyProfilePage() {
         }
     };
 
+    const onAvatarUpdated = (newUrl: string) => {
+        setData(prev =>
+            prev
+                ? {
+                    ...prev,
+                    data: {
+                        ...(prev as any).data,
+                        attributes: {
+                            ...(prev as any).data?.attributes,
+                            avatar_url: newUrl,
+                        },
+                    },
+                }
+                : prev
+        );
+        void reload();
+    };
+
     return (
         <div className={s.root}>
             <NavBar />
@@ -110,11 +127,7 @@ export default function MyProfilePage() {
                     <>
                         <FormError>{error}</FormError>
                         <div className={s.actions}>
-                            {status === 401 && (
-                                <Button onClick={() => navigate("/login")}>
-                                    Back to Login
-                                </Button>
-                            )}
+                            {status === 401 && <Button onClick={() => navigate("/login")}>Back to Login</Button>}
                         </div>
                     </>
                 )}
@@ -122,27 +135,25 @@ export default function MyProfilePage() {
                 {ok && <FormOk>{ok}</FormOk>}
 
                 {data && !editing && !loading && (
-                    <>
-                        <ProfileView
-                            profile={data}
-                            actions={
-                                <>
-                                    <Button onClick={startEdit}>Edit</Button>
-                                    <Button onClick={userLogout}>Logout</Button>
-                                    {(data as any).role === "admin" && (
-                                        <Button onClick={() => setCreateOpen((v) => !v)}>
-                                            {createOpen ? "Close create form" : "Create user"}
-                                        </Button>
-                                    )}
-                                </>
-                            }
-                        />
-                    </>
+                    <ProfileView
+                        profile={data}
+                        actions={
+                            <>
+                                <Button onClick={startEdit}>Edit</Button>
+                                <Button onClick={userLogout}>Logout</Button>
+                                {(data as any).role === "admin" && (
+                                    <Button onClick={() => setCreateOpen(v => !v)}>
+                                        {createOpen ? "Close create form" : "Create user"}
+                                    </Button>
+                                )}
+                            </>
+                        }
+                    />
                 )}
 
                 {data && editing && !loading && (
                     <ProfileEditor
-                        avatarUrl={data.data.attributes.avatar_url}
+                        avatarUrl={getUserPic(data.data.attributes.avatar_url)} // <-- кэш-бастер
                         username={username}
                         pseudonym={pseudonym}
                         fieldErrors={fieldErrors}
@@ -151,22 +162,20 @@ export default function MyProfilePage() {
                         onChangePseudonym={setPseudonym}
                         onCancel={cancelEdit}
                         onSubmit={onSave}
+                        onAvatarUpdated={onAvatarUpdated} // <-- новый проп
                     />
                 )}
             </div>
 
             {data && (
                 <section className={s.section}>
-                    <ResetPasswordForm onCancel={() => { /* оставим пустым, если в форме есть cancel — можно скрыть поля локально */ }} />
+                    <ResetPasswordForm onCancel={() => {}} />
                 </section>
             )}
 
             {data && (data as any).role === "admin" && createOpen && (
                 <section className={s.section}>
-                    <AdminCreateUserForm
-                        onSuccess={() => {}}
-                        onCancel={() => setCreateOpen(false)}
-                    />
+                    <AdminCreateUserForm onSuccess={() => {}} onCancel={() => setCreateOpen(false)} />
                 </section>
             )}
         </div>

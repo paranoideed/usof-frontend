@@ -4,7 +4,7 @@ import s from "./ProfileMini.module.scss";
 import AvatarImg from "@components/ui/AvatarImg.tsx";
 import getUserPic from "@features/ui.ts";
 
-import type {Profile} from "@features/profiles/types.ts";
+import type {Profile} from "@features/profiles/profile.ts";
 
 type Props = {
     profile: Profile;

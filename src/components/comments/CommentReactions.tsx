@@ -5,10 +5,10 @@ import DislikeButton from "@components/ui/DislikeButton";
 
 import { getComment } from "@features/comments/get";
 import { likeComment, unlikeComment } from "@features/likes/comments";
-
 import { parseMyReaction, type LikeType, type MyReaction } from "@features/likes/like";
 import { getCurrentUserId } from "@features/auth/sessions";
 
+import LoginRequiredModal from "@components/ui/LoginRequiredModal.tsx"; // ← добавили
 import s from "./CommentReactions.module.scss";
 
 type Props = {
@@ -19,17 +19,18 @@ type Props = {
 };
 
 export default function CommentReactions({
- commentId,
- initialLikes,
- initialDislikes,
- initialMyReaction,
+    commentId,
+    initialLikes,
+    initialDislikes,
+    initialMyReaction,
 }: Props) {
     const [likes, setLikes] = React.useState<number>(initialLikes);
     const [dislikes, setDislikes] = React.useState<number>(initialDislikes);
     const [userReaction, setUserReaction] = React.useState<MyReaction>(parseMyReaction(initialMyReaction));
     const [busy, setBusy] = React.useState(false);
 
-    const isAuthed = !!getCurrentUserId();
+    const [loginOpen, setLoginOpen] = React.useState(false); // ← добавили
+    const meId = getCurrentUserId();
 
     React.useEffect(() => {
         setLikes(initialLikes);
@@ -42,31 +43,30 @@ export default function CommentReactions({
 
         const rawLikes = src.likes ?? likes;
         const rawDislikes = src.dislikes ?? dislikes;
-        const rawReaction =
-            src.user_reaction ??
-            src.reaction ??
-            src.type ??
-            null;
+        const rawReaction = src.user_reaction ?? src.reaction ?? src.type ?? null;
 
         setLikes(Number(rawLikes));
         setDislikes(Number(rawDislikes));
         setUserReaction(parseMyReaction(typeof rawReaction === "string" ? rawReaction.toLowerCase() : rawReaction));
     };
 
+    function ensureAuth(): boolean {
+        if (!meId) {
+            setLoginOpen(true);  // ← открываем модалку
+            return false;
+        }
+        return true;
+    }
+
     const handleReact = async (type: LikeType) => {
         if (busy) return;
 
-        if (!isAuthed) {
-            console.warn("Must be logged in to react");
-            return;
-        }
+        if (!ensureAuth()) return; // ← проверка авторизации
 
         setBusy(true);
         try {
             const current = await getComment(commentId);
-            const currentReaction = parseMyReaction(
-                current?.data?.attributes?.user_reaction ?? null
-            );
+            const currentReaction = parseMyReaction(current?.data?.attributes?.user_reaction ?? null);
 
             const updated =
                 currentReaction === type
@@ -86,8 +86,9 @@ export default function CommentReactions({
         }
     };
 
-    const likeDisabled = busy || !isAuthed;
-    const dislikeDisabled = busy || !isAuthed;
+    // ВАЖНО: не отключаем кнопки для неавторизованного, чтобы клик открыл модалку
+    const likeDisabled = busy;
+    const dislikeDisabled = busy;
 
     return (
         <div className={s.reactions} role="group" aria-label="Reactions">
@@ -97,7 +98,6 @@ export default function CommentReactions({
                 aria-pressed={userReaction === "like"}
                 onClick={() => handleReact("like")}
                 count={likes}
-                title={isAuthed ? undefined : "Войдите, чтобы поставить лайк"}
             />
             <DislikeButton
                 active={userReaction === "dislike"}
@@ -105,8 +105,9 @@ export default function CommentReactions({
                 aria-pressed={userReaction === "dislike"}
                 onClick={() => handleReact("dislike")}
                 count={dislikes}
-                title={isAuthed ? undefined : "Войдите, чтобы поставить дизлайк"}
             />
+
+            <LoginRequiredModal open={loginOpen} onClose={() => setLoginOpen(false)} />
         </div>
     );
 }
