@@ -124,11 +124,7 @@ export default function MyProfilePage() {
                 {data && !editing && !loading && (
                     <>
                         <ProfileView
-                            avatar_url={data.avatar_url}
-                            username={(data as any).username ?? (data as any).login}
-                            pseudonym={(data as any).pseudonym}
-                            reputation={"reputation" in (data as any) ? (data as any).reputation : null}
-                            created_at={data.created_at}
+                            profile={data}
                             actions={
                                 <>
                                     <Button onClick={startEdit}>Edit</Button>
@@ -146,7 +142,7 @@ export default function MyProfilePage() {
 
                 {data && editing && !loading && (
                     <ProfileEditor
-                        avatarUrl={data.avatar_url}
+                        avatarUrl={data.data.attributes.avatar_url}
                         username={username}
                         pseudonym={pseudonym}
                         fieldErrors={fieldErrors}

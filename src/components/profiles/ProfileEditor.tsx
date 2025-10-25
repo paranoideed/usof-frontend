@@ -44,8 +44,8 @@ export default function ProfileEditor(props: Props) {
             setUploading(true);
 
             const profile = await updateAvatar(file);
-            if (profile.avatar_url) {
-                avatar = profile.avatar_url;
+            if (profile.data.attributes.avatar_url) {
+                avatar = profile.data.attributes.avatar_url;
             }
         } catch (err: any) {
             console.error(err);

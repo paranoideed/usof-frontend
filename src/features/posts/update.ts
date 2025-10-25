@@ -1,27 +1,64 @@
 import api from "@features/api.ts";
-
-import type {Post, PostStatus} from "@features/posts/posts.ts";
+import type {Post, PostStatus} from "@features/posts/post.ts";
 
 export type PostUpdateInput = {
-    id: string;
-    title: string;
-    content: string;
-    categories: string[];
+    data: {
+        type: "post";
+        id:   string;
+        attributes: {
+            title?:      string;
+            content?:    string;
+            categories?: string[];
+        };
+    };
 };
 
-export async function updatePost(body: PostUpdateInput): Promise<Post> {
-    const { id, ...rest } = body;
-
+export async function updatePost(input: {
+    id: string;
+    title?: string;
+    content?: string;
+    categories?: string[];
+}): Promise<Post> {
     const payload = {
-        title: rest.title?.trim(),
-        content: rest.content?.trim(),
-        categories: Array.isArray(rest.categories) ? rest.categories.slice(0, 5) : [],
+        data: {
+            type: "post",
+            id:   input.id,
+            attributes: {
+                title:      input.title,
+                content:    input.content,
+                categories: input.categories,
+            },
+        },
     };
 
-    const res = await api.put<Post>(`/posts/${id}`, payload);
+    const res = await api.put<Post>(`/posts/${input.id}`, payload);
     return res.data;
 }
 
-export async function updatePostStatus(postId: string, status: PostStatus): Promise<void> {
-    await api.patch(`/posts/${postId}/status`, { status });
+export type PostStatusUpdateInput = {
+    data: {
+        type: "post";
+        id:   string;
+        attributes: {
+            status: PostStatus;
+        };
+    };
+};
+
+export async function updatePostStatus(input: {
+    postId: string;
+    status: PostStatus;
+}): Promise<Post> {
+    const payload = {
+        data: {
+            type: "post",
+            id:   input.postId,
+            attributes: {
+                status: input.status,
+            },
+        },
+    };
+
+    const res = await api.put<Post>(`/posts/${input.postId}`, payload);
+    return res.data;
 }

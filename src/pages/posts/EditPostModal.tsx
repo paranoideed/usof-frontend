@@ -6,10 +6,9 @@ import Button from "@components/ui/Button.tsx";
 import { updatePost } from "@features/posts/update.ts";
 import { listCategories } from "@features/categories/list.ts";
 
-import type { Post } from "@features/posts/posts.ts";
-import type { Category } from "@features/categories/types.ts";
-
 import s from "./CreatePostModal.module.scss";
+import type {Category} from "@features/categories/category.ts";
+import type {Post} from "@features/posts/post.ts";
 
 type Props = {
     open: boolean;
@@ -48,16 +47,21 @@ export default function EditPostModal({
 
     React.useEffect(() => {
         if (!open) return;
+
+        let mounted = true;
         (async () => {
             try {
-                setCats(await listCategories({}).then((res) => res.data));
+                const res = await listCategories({ limit: 100, offset: 0 });
+                const items: Category[] = (res.data ?? []).map(d => ({ data: d }));
+                if (mounted) setCats(items);
             } catch {
-                /* no-op */
             }
         })();
+
+        return () => { mounted = false; };
     }, [open]);
 
-    // синхронизируемся, если пост перезагрузили с сервера
+
     React.useEffect(() => {
         if (!open) return;
         setTitle(initialTitle);
@@ -170,13 +174,13 @@ export default function EditPostModal({
                         >
                             <div className={s.cats}>
                                 {cats.map((c) => (
-                                    <label key={c.id} className={s.catItem}>
+                                    <label key={c.data.id} className={s.catItem}>
                                         <input
                                             type="checkbox"
-                                            checked={categories.includes(c.id)}
-                                            onChange={() => toggleCat(c.id)}
+                                            checked={categories.includes(c.data.id)}
+                                            onChange={() => toggleCat(c.data.id)}
                                         />{" "}
-                                        {c.title}
+                                        {c.data.attributes.title}
                                     </label>
                                 ))}
                                 {cats.length === 0 && <div className={s.hint}>No categories found</div>}

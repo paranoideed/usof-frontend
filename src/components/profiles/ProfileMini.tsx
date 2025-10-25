@@ -4,26 +4,25 @@ import s from "./ProfileMini.module.scss";
 import AvatarImg from "@components/ui/AvatarImg.tsx";
 import getUserPic from "@features/ui.ts";
 
+import type {Profile} from "@features/profiles/types.ts";
+
 type Props = {
-    id: string;
-    username: string;
-    pseudonym?: string | null;
-    avatar_url?: string | null;
-    to?: string;
+    profile: Profile;
 };
 
-export default function ProfileMini({ id, username, pseudonym, avatar_url, to }: Props) {
-    const href = to ?? `/profiles/id/${id}`;
+export default function ProfileMini(param: Props) {
     return (
-        <Link to={href} className={s.item}>
+        <Link to={`/profiles/id/${param.profile.data.id}`} className={s.item}>
             <AvatarImg
                 className={s.avatar}
-                src={getUserPic(avatar_url)}
+                src={getUserPic(param.profile.data.attributes.avatar_url)}
                 alt="avatar"
             />
             <div className={s.meta}>
-                <div className={s.username}>{username}</div>
-                {pseudonym ? <div className={s.pseudonym}>{pseudonym}</div> : null}
+                <div className={s.username}>{param.profile.data.attributes.username}</div>
+                {param.profile.data.attributes.pseudonym ? <div className={s.pseudonym}>
+                    {param.profile.data.attributes.pseudonym}
+                </div> : null}
             </div>
         </Link>
     );

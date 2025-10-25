@@ -6,9 +6,9 @@ import CommentThread from "@components/comments/CommentThread.tsx";
 
 import { createComment } from "@features/comments/create.ts";
 import { getCurrentUserId } from "@/features/auth/sessions";
-import { fetchCommentsByParent } from "@features/comments/fetched.ts";
+import { fetchCommentsByParent } from "@features/comments/list.ts";
 
-import type { Comment } from "@features/comments/types";
+import type { Comment } from "@features/comments/comment.ts";
 
 import s from "./CommentsSection.module.scss";
 
@@ -62,12 +62,11 @@ export default function CommentsSection({ postId }: Props) {
         (async () => {
             try {
                 const res = await fetchCommentsByParent(postId, null, PAGE_SIZE, 0);
-                if (ignore) return;
-                setItems(res.data ?? []);
-                if (typeof res.total === "number") setTotal(res.total);
-                setOffset((res.offset ?? 0) + (res.limit ?? PAGE_SIZE));
+                setItems((res.data ?? []).map(d => ({ data: d })));
+                setTotal(res.meta.total);
+                setOffset((res.meta.offset ?? 0) + (res.meta.limit ?? PAGE_SIZE));
             } catch (e: any) {
-                if (!ignore) setErr(e?.message ?? "Не удалось загрузить комментарии");
+                if (!ignore) setErr(e?.message ?? "Failed to load comments");
             } finally {
                 if (!ignore) setLoading(false);
             }
@@ -81,9 +80,9 @@ export default function CommentsSection({ postId }: Props) {
         setLoadingMore(true);
         try {
             const res = await fetchCommentsByParent(postId, null, PAGE_SIZE, offset);
-            setItems((prev) => [...prev, ...(res.data ?? [])]);
-            if (typeof res.total === "number") setTotal(res.total);
-            setOffset((res.offset ?? offset) + (res.limit ?? PAGE_SIZE));
+            setItems(prev => [...prev, ...((res.data ?? []).map(d => ({ data: d })))]);
+            setTotal(res.meta.total);
+            setOffset((res.meta.offset ?? offset) + (res.meta.limit ?? PAGE_SIZE));
         } finally { setLoadingMore(false); }
     };
 
@@ -107,12 +106,12 @@ export default function CommentsSection({ postId }: Props) {
         setReplyErr(null);
         const parsed = ContentSchema.safeParse(replyValue.trim());
         if (!parsed.success) {
-            setReplyErr(parsed.error.issues[0]?.message ?? "Неверный текст");
+            setReplyErr(parsed.error.issues[0]?.message ?? "Invalid content");
             return;
         }
 
         const authorId = getCurrentUserId();
-        if (!authorId) { setReplyErr("Нужно войти, чтобы отвечать"); return; }
+        if (!authorId) { setReplyErr("U need to login for response"); return; }
 
         setPosting(true);
         try {
@@ -123,12 +122,11 @@ export default function CommentsSection({ postId }: Props) {
                 content: parsed.data,
             });
 
-            // сообщим родительской ветке — она локально добавит ответ + инкрементит счётчик
             replyTarget.onCreated?.(created);
 
             closeReply();
         } catch (e: any) {
-            setReplyErr(e?.response?.data?.error ?? e?.message ?? "Не удалось отправить ответ");
+            setReplyErr(e?.response?.data?.error ?? e?.message ?? "Failed to send reply");
         } finally {
             setPosting(false);
         }
@@ -139,7 +137,6 @@ export default function CommentsSection({ postId }: Props) {
             <div className={s.root}>
                 <h3 className={s.title}>Comments</h3>
 
-                {/* Форма нового корневого комментария остаётся как раньше */}
                 <RootComposer
                     postId={postId}
                     onCreated={(created) => {
@@ -162,7 +159,7 @@ export default function CommentsSection({ postId }: Props) {
                                     key={c.data.id}
                                     postId={postId}
                                     comment={c}
-                                    replies={c.data.replies_count}
+                                    replies={c.data.attributes.replies_count}
                                     onDeleted={(id) => {
                                         setItems((prev) => prev.filter((x) => x.data.id !== id));
                                         setTotal((t) => (typeof t === "number" ? Math.max(0, t - 1) : t));
@@ -192,9 +189,9 @@ export default function CommentsSection({ postId }: Props) {
                 {replyTarget && (
                     <form className={s.replyDock} onSubmit={submitReply}>
                         <div className={s.replyDockHeader}>
-              <span className={s.replyDockTitle}>
-                Replying to <strong>@{replyTarget.parent.data.author_username}</strong>
-              </span>
+                <span className={s.replyDockTitle}>
+                    Replying to <strong>@{replyTarget.parent.data.attributes.author_username}</strong>
+                        </span>
                             <button type="button" className={s.replyDockClose} onClick={closeReply} aria-label="Close reply">
                                 ✕
                             </button>
@@ -246,7 +243,6 @@ function RootComposer({ postId, onCreated }: { postId: string; onCreated: (c: Co
             const created = await createComment({
                 post_id: postId,
                 author_id: authorId,
-                parent_id: null,
                 content: parsed.data,
             });
             onCreated(created);

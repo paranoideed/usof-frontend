@@ -7,9 +7,9 @@ import { createPost } from "@features/posts/create.ts";
 import { listCategories } from "@features/categories/list.ts";
 import { getCurrentUserId } from "@features/auth/sessions.ts";
 
-import type {Category, ListCategories} from "@features/categories/types.ts";
 
 import s from "./CreatePostModal.module.scss";
+import type {Category} from "@features/categories/category.ts";
 
 type Props = { open: boolean; onClose: () => void; onCreated?: () => void };
 type FieldErrors = { common?: string; title?: string; content?: string; categories?: string };
@@ -25,14 +25,21 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
 
     React.useEffect(() => {
         if (!open) return;
+
+        let mounted = true;
         (async () => {
             try {
-                setCats(await listCategories({}).then((res: ListCategories) => res.data) );
+                const res = await listCategories({ limit: 20, offset: 0 });
+                const items: Category[] = (res.data ?? []).map(d => ({ data: d }));
+                if (mounted) setCats(items);
             } catch {
                 /* no-op */
             }
         })();
+
+        return () => { mounted = false; };
     }, [open]);
+
 
     if (!open) return null;
 
@@ -65,7 +72,6 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
             }
 
             await createPost({
-                author_id: uid,
                 title,
                 content,
                 categories: categories.slice(0, 5),
@@ -147,13 +153,13 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
                         >
                             <div className={s.cats}>
                                 {cats.map((c) => (
-                                    <label key={c.id} className={s.catItem}>
+                                    <label key={c.data.id} className={s.catItem}>
                                         <input
                                             type="checkbox"
-                                            checked={categories.includes(c.id)}
-                                            onChange={() => toggleCat(c.id)}
+                                            checked={categories.includes(c.data.id)}
+                                            onChange={() => toggleCat(c.data.id)}
                                         />{" "}
-                                        {c.title}
+                                        {c.data.attributes.title}
                                     </label>
                                 ))}
                                 {cats.length === 0 && <div className={s.hint}>Категории не найдены</div>}

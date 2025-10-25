@@ -1,7 +1,7 @@
 import PostSmall from "@components/posts/PostSmall.tsx";
 import SecondButton from "@components/ui/SecondButton.tsx";
 
-import type {Post} from "@features/posts/posts.ts";
+import type {Post} from "@features/posts/post.ts";
 
 import s from "@components/posts/PostsList.module.scss";
 

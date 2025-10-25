@@ -8,31 +8,43 @@ import NavBar from "@/components/ui/NavBar";
 import CreatePostModal from "@pages/posts/CreatePostModal";
 
 import api from "@features/api";
-import type { ListPostsParams } from "@features/posts/fetch";
+import type { ListPostsParams } from "@features/posts/list.ts";
 
 import s from "@/pages/posts/PostsFeedPage.module.scss";
 import PostsList from "@components/posts/PostsList.tsx";
 import PostListFilterPanel, { type CategoryRow } from "@components/posts/PostListFilterPanel";
 
-function useCategories() {
+export function useCategories() {
     const [items, setItems] = React.useState<CategoryRow[]>([]);
     const [loading, setLoading] = React.useState(false);
     const [err, setErr] = React.useState<string | null>(null);
 
     React.useEffect(() => {
         let ok = true;
+
         (async () => {
             setLoading(true);
             setErr(null);
             try {
+                // при желании можно передать limit/offset
                 const r = await api.get("/categories");
-                setItems(r.data?.data ?? r.data ?? []);
+
+                // JSON:API: r.data = { data: Array<Resource>, meta? }
+                const rows: any[] = r?.data?.data ?? [];
+                const mapped: CategoryRow[] = rows.map((cat) => ({
+                    id: String(cat.id),
+                    // у тебя в типах category.attributes.title; на всякий случай fallback на name
+                    title: cat?.attributes?.title ?? cat?.attributes?.name ?? "",
+                }));
+
+                if (ok) setItems(mapped);
             } catch (e: any) {
-                setErr(e?.message ?? "Failed to load categories");
+                if (ok) setErr(e?.message ?? "Failed to load categories");
             } finally {
                 if (ok) setLoading(false);
             }
         })();
+
         return () => {
             ok = false;
         };
@@ -40,6 +52,7 @@ function useCategories() {
 
     return { items, loading, err };
 }
+
 
 export default function PostsFeedPage() {
     const [searchParams, setSearchParams] = useSearchParams();

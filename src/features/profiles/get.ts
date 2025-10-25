@@ -17,24 +17,10 @@ export async function getMeProfile(): Promise<Profile> {
 
 export async function getProfileById(userId: string): Promise<Profile> {
     const { data } = await api.get(`/profiles/id/${userId}`);
-    return {
-        id: data.id ?? data.user_id,
-        username: data.username,
-        pseudonym: data.pseudonym ?? null,
-        avatar_url: data.avatar_url ?? null,
-        reputation: data.reputation ?? 0,
-        created_at: data.created_at
-    };
+    return data
 }
 
 export async function getProfileByUsername(username: string): Promise<Profile> {
     const { data } = await api.get(`/profiles/username/${username}`);
-    return {
-        id: data.id ?? data.user_id,
-        username: data.username,
-        pseudonym: data.pseudonym ?? null,
-        avatar_url: data.avatar_url ?? null,
-        reputation: data.reputation ?? 0,
-        created_at: data.created_at
-    };
+    return data
 }

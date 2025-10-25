@@ -1,22 +1,31 @@
 import api from "@/features/api.ts";
 
 export type RegisterInput = {
-    username: string;
-    email: string;
-    password: string;
-    passwordConfirm: string;
+    data: {
+        type: "register";
+        attributes: {
+            username: string;
+            email: string;
+            password: string;
+        };
+    }
 };
 
-export async function register(input: RegisterInput): Promise<any> {
-    const payload = {
-        email: input.email,
-        username: input.username,
-        password: input.password,
-    };
+export async function register(params: {email: string, username: string, password: string}): Promise<any> {
+    const body: RegisterInput = {
+        data: {
+            type: "register",
+            attributes: {
+                email: params.email,
+                username: params.username,
+                password: params.password,
+            }
+        }
+    }
 
     try {
-        const { data } = await api.post('/auth/register', payload);
-        console.log("success: ", data);
+        const { data } = await api.post('/auth/register', body);
+
         return data;
     } catch (error: any) {
         if (error.response) {

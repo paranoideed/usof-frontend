@@ -55,7 +55,7 @@ export default function RegisterPage() {
 
         try {
             setLoading(true);
-            await apiRegister({ username, email, password, passwordConfirm: confirmPassword });
+            await apiRegister({ username, email, password});
             setOk("Registration successful! You can now log in.");
 
             setTimeout(() => {

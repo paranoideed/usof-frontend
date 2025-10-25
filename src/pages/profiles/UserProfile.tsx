@@ -11,37 +11,10 @@ import s from "./UserProfile.module.scss";
 
 import PostsList from "@components/posts/PostsList.tsx";
 import usePostsFeed from "@pages/posts/hooks/usePostsFeed.ts";
-import type { ListPostsParams } from "@features/posts/fetch.ts";
-import PostListFilterPanel, { type CategoryRow } from "@components/posts/PostListFilterPanel.tsx";
+import type { ListPostsParams } from "@features/posts/list.ts";
+import PostListFilterPanel from "@components/posts/PostListFilterPanel.tsx";
 
-import api from "@features/api";
-
-function useCategories() {
-    const [items, setItems] = React.useState<CategoryRow[]>([]);
-    const [loading, setLoading] = React.useState(false);
-    const [err, setErr] = React.useState<string | null>(null);
-
-    React.useEffect(() => {
-        let ok = true;
-        (async () => {
-            setLoading(true);
-            setErr(null);
-            try {
-                const r = await api.get("/categories");
-                setItems(r.data?.data ?? r.data ?? []);
-            } catch (e: any) {
-                setErr(e?.message ?? "Failed to load categories");
-            } finally {
-                if (ok) setLoading(false);
-            }
-        })();
-        return () => {
-            ok = false;
-        };
-    }, []);
-
-    return { items, loading, err };
-}
+import {useCategories} from "@pages/posts/PostsFeedPage.tsx";
 
 export default function UserProfilePage() {
     const params = useParams();
@@ -60,13 +33,13 @@ export default function UserProfilePage() {
 
     const filters = React.useMemo<ListPostsParams>(() => {
         return {
-            author_id: data?.id || undefined,
+            author_id: data?.data.id || undefined,
             title: q || undefined,
             order_by: orderBy,
             order_dir: orderDir,
             category_id: categoryId || undefined,
         };
-    }, [data?.id, q, orderBy, orderDir, categoryId]);
+    }, [data?.data.id, q, orderBy, orderDir, categoryId]);
 
     const {
         items,
@@ -81,8 +54,8 @@ export default function UserProfilePage() {
     });
 
     React.useEffect(() => {
-        if (data?.id) reload();
-    }, [data?.id, q, orderBy, orderDir, categoryId]);
+        if (data?.data.id) reload();
+    }, [data?.data.id, q, orderBy, orderDir, categoryId]);
 
     if (loading) return <div className={s.root}>Loading…</div>;
 
@@ -102,11 +75,7 @@ export default function UserProfilePage() {
 
                     {data && (
                         <ProfileView
-                            username={data.username}
-                            pseudonym={data.pseudonym ?? undefined}
-                            avatar_url={data.avatar_url ?? undefined}
-                            reputation={data.reputation}
-                            created_at={data.created_at}
+                            profile={data}
                         />
                     )}
                 </div>

@@ -1,15 +1,34 @@
 export type Profile = {
-    id:          string;
-    username:    string;
-    pseudonym?:  string | null;
-    avatar_url?: string | null;
-    reputation:  number;
-    created_at:  Date;
+    data: {
+        id: string;
+        type: "profile"
+        attributes: {
+            username:   string;
+            pseudonym:  string | null;
+            avatar_url: string | null;
+            reputation: number;
+            created_at: Date;
+            updated_at: Date | null;
+        }
+    }
 };
 
 export type ProfileList = {
-    items:  Profile[];
-    total:  number;
-    limit:  number;
-    offset: number;
+    data: {
+        id: string;
+        type: "profile"
+        attributes: {
+            username:   string;
+            pseudonym:  string | null;
+            avatar_url: string | null;
+            reputation: number;
+            created_at: Date;
+            updated_at: Date | null;
+        }
+    }[];
+    meta: {
+        total:  number;
+        limit:  number;
+        offset: number;
+    }
 };

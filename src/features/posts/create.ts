@@ -1,21 +1,34 @@
 import api from "@features/api.ts";
+import type {Post} from "@features/posts/post.ts";
 
-import type {Post} from "@features/posts/posts.ts";
 
 export type CreatePostInput = {
-    author_id: string;
-    title:     string;
-    content:   string;
-    categories?: string[];
+    data: {
+        type: "post";
+        attributes: {
+            title:      string;
+            content:    string;
+            categories?: string[];
+        };
+    }
 };
 
-export async function createPost(input: CreatePostInput): Promise<Post> {
-    const payload = {
-        author_id:  input.author_id,
-        title:      input.title?.trim(),
-        content:    input.content?.trim(),
-        categories: input.categories && input.categories.length ? input.categories : undefined,
+export async function createPost(input: {
+    title: string;
+    content: string;
+    categories?: string[];
+}): Promise<Post> {
+    const body: CreatePostInput = {
+        data: {
+            type: "post",
+            attributes: {
+                title:      input.title,
+                content:    input.content,
+                categories: input.categories,
+            },
+        },
     };
-    const { data } = await api.post<Post>("/posts", payload);
+
+    const { data } = await api.post<Post>("/posts", body);
     return data;
 }

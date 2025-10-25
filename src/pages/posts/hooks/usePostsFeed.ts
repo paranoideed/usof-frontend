@@ -1,6 +1,6 @@
 import * as React from "react";
-import {listPosts, type ListPostsParams} from "@features/posts/fetch.ts";
-import type {Post} from "@features/posts/posts.ts";
+import { listPosts, type ListPostsParams } from "@features/posts/list";
+import type { Post } from "@features/posts/post";
 
 type UsePostsFeedOpts = {
     pageSize?: number;
@@ -23,11 +23,13 @@ export default function usePostsFeed(opts: UsePostsFeedOpts = {}) {
         try {
             const offset = reset ? 0 : page * pageSize;
             const params: ListPostsParams = { ...baseFilters, limit: pageSize, offset };
-            const res = await listPosts(params);
 
-            const data: Post[] = (res as any).data ?? (res as any).posts ?? [];
-            const totalCount: number | null =
-                (res as any).total ?? (res as any).pagination?.total ?? null;
+            const res = await listPosts(params);
+            // res по JSON:API: { data: ResourceObject[], meta: { total, limit, offset } }
+            const rows = (res as any)?.data ?? [];
+            const data: Post[] = rows.map((d: any) => ({ data: d })); // <-- НОРМАЛИЗАЦИЯ!
+
+            const totalCount: number | null = (res as any)?.meta?.total ?? null;
 
             setItems(prev => (reset ? data : [...prev, ...data]));
 
@@ -53,9 +55,10 @@ export default function usePostsFeed(opts: UsePostsFeedOpts = {}) {
         if (!loading && hasMore) void load(false);
     }, [load, loading, hasMore]);
 
+    // Обновлять при изменении фильтров
     React.useEffect(() => {
         void load(true);
-    }, [JSON.stringify(baseFilters)]); // перезагрузка при смене фильтров
+    }, [JSON.stringify(baseFilters)]);
 
     return { items, loading, err, hasMore, loadMore, reload };
 }

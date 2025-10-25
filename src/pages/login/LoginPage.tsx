@@ -55,16 +55,16 @@ export default function LoginPage() {
             setLoading(true);
             const data = await login({ identifier, password });
 
-            Cookies.set("token", data.token, {
+            Cookies.set("token", data.data.attributes.token, {
                 expires: 7,
                 sameSite: "lax",
                 secure: window.location.protocol === "https:",
             });
 
-            saveUsername(data.profile.username);
+            saveUsername(data.data.attributes.username);
 
-            if (data.profile.avatar_url) {
-                saveAvatar(data.profile.avatar_url);
+            if (data.data.attributes.avatar_url) {
+                saveAvatar(data.data.attributes.avatar_url);
             }
 
             navigate("/profiles/me");

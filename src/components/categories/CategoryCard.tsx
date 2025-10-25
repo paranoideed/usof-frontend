@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 import { isAdmin } from "@/features/auth/sessions";
 
-import type { Category } from "@features/categories/types";
+import type { Category } from "@/features/categories/category";
 
 import s from "./CategoryCard.module.scss";
 
@@ -16,7 +16,7 @@ export default function CategoryCard({ item, onEdit, onDelete }: CategoryCardPro
     const admin = isAdmin();
     const navigate = useNavigate();
 
-    const goToPosts = () => navigate(`/posts?category=${encodeURIComponent(item.id)}`);
+    const goToPosts = () => navigate(`/posts?category=${encodeURIComponent(item.data.id)}`);
 
     return (
         <div className={s.card} role="button" tabIndex={0} onClick={goToPosts} onKeyDown={(e) => {
@@ -24,9 +24,9 @@ export default function CategoryCard({ item, onEdit, onDelete }: CategoryCardPro
         }}>
             <div className={s.content}>
                 <div className={s.head}>
-                    <h3 className={s.title}>{item.title}</h3>
+                    <h3 className={s.title}>{item.data.attributes.title}</h3>
                 </div>
-                <p className={s.desc}>{item.description}</p>
+                <p className={s.desc}>{item.data.attributes.description}</p>
             </div>
 
             {admin && (

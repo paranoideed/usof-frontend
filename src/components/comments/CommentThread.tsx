@@ -3,12 +3,12 @@ import * as React from "react";
 import Button from "@components/ui/Button.tsx";
 import CommentReactions from "@/components/comments/CommentReactions";
 
-import { fetchCommentsByParent } from "@/features/comments/fetched";
+import { fetchCommentsByParent } from "@features/comments/list.ts";
 import { canDeleteComment, deleteComment } from "@/features/comments/delete";
 import { getCurrentUserId, getCurrentUserRole } from "@/features/auth/sessions";
-import { parseMyReaction } from "@/features/likes/types";
+import { parseMyReaction } from "@features/likes/like.ts";
 
-import type { Comment } from "@/features/comments/types";
+import type { Comment } from "@features/comments/comment.ts";
 import { ReplyContext } from "@/components/comments/CommentsSection";
 
 import s from "./CommentThread.module.scss";
@@ -59,10 +59,10 @@ export default function CommentThread({ postId, comment, depth = 0, replies, onD
         setLoadingReplies(true);
         try {
             const res = await fetchCommentsByParent(postId, comment.data.id, PAGE_SIZE, 0);
-            setReplies(res.data ?? []);
-            if (typeof res.total === "number") setRTotal(res.total);
-            else setRTotal((res.data ?? []).length);
-            setROffset((res.offset ?? 0) + (res.limit ?? PAGE_SIZE));
+
+            setReplies((res.data ?? []).map(d => ({ data: d })));
+            setRTotal(res.meta?.total ?? (res.data ?? []).length);
+            setROffset((res.meta?.offset ?? 0) + (res.meta?.limit ?? PAGE_SIZE));
         } finally {
             setLoadingReplies(false);
         }
@@ -73,9 +73,10 @@ export default function CommentThread({ postId, comment, depth = 0, replies, onD
         setLoadingMore(true);
         try {
             const res = await fetchCommentsByParent(postId, comment.data.id, PAGE_SIZE, rOffset);
-            setReplies((prev) => [...prev, ...(res.data ?? [])]);
-            if (typeof res.total === "number") setRTotal(res.total);
-            setROffset((res.offset ?? rOffset) + (res.limit ?? PAGE_SIZE));
+
+            setReplies(prev => [...prev, ...((res.data ?? []).map(d => ({ data: d })))]);
+            setRTotal(res.meta?.total ?? rTotal ?? null);
+            setROffset((res.meta?.offset ?? rOffset) + (res.meta?.limit ?? PAGE_SIZE));
             setShowReplies(true);
         } finally {
             setLoadingMore(false);
@@ -95,14 +96,12 @@ export default function CommentThread({ postId, comment, depth = 0, replies, onD
         ? `Hide answers (${effectiveTotal})`
         : `Show answers (${effectiveTotal})`;
 
-    // === интеграция с док-композером ===
     const reply = React.useContext(ReplyContext);
     const openReplyDock = () => {
         reply.open({
             postId,
             parent: comment,
             onCreated: (created) => {
-                // локально обновим ветку:
                 setReplies((prev) => [created, ...prev]);
                 setShowReplies(true);
                 setRTotal((t) => (typeof t === "number" ? t + 1 : t));
@@ -133,19 +132,19 @@ export default function CommentThread({ postId, comment, depth = 0, replies, onD
         >
 
             <div className={s.header}>
-                <span className={s.author}>@{comment.data.author_username}</span>
-                <time className={s.time}>{new Date(comment.data.created_at).toLocaleString()}</time>
+                <span className={s.author}>@{comment.data.attributes.author_username}</span>
+                <time className={s.time}>{new Date(comment.data.attributes.created_at).toLocaleString()}</time>
             </div>
 
-            <p className={s.content}>{comment.data.content}</p>
+            <p className={s.content}>{comment.data.attributes.content}</p>
 
             <div className={s.btnFooter}>
                 <div>
                     <CommentReactions
                         commentId={comment.data.id}
-                        initialLikes={comment.data.likes}
-                        initialDislikes={comment.data.dislikes}
-                        initialMyReaction={parseMyReaction(comment.user_reaction)}
+                        initialLikes={comment.data.attributes.likes}
+                        initialDislikes={comment.data.attributes.dislikes}
+                        initialMyReaction={parseMyReaction(comment.data.attributes.user_reaction)}
                     />
                 </div>
 
@@ -188,7 +187,7 @@ export default function CommentThread({ postId, comment, depth = 0, replies, onD
                                 postId={postId}
                                 comment={r}
                                 depth={depth + 1}
-                                replies={r.data.replies_count}  // но визуальный отступ уже capped в этом компоненте
+                                replies={r.data.attributes.replies_count}
                                 onDeleted={(id) => {
                                     setReplies((prev) => prev.filter((x) => x.data.id !== id));
                                     setRTotal((t) => (typeof t === "number" ? Math.max(0, t - 1) : t));
@@ -207,10 +206,10 @@ export default function CommentThread({ postId, comment, depth = 0, replies, onD
                     </button>
                     {typeof effectiveTotal === "number" && (
                         <span className={s.totalHint}>
-                     Show {repliesState.length} from {effectiveTotal}
-                    </span>
-                     )}
-                    </div>
+                            Show {repliesState.length} from {effectiveTotal}
+                        </span>
+                    )}
+                </div>
             )}
         </li>
     );

@@ -19,30 +19,21 @@ type Props = {
     catLoading: boolean;
 };
 
-export default function PostListFilterPanel({
-    q,
-    onChangeQ,
-    orderBy,
-    onChangeOrderBy,
-    categoryId,
-    onChangeCategoryId,
-    categories,
-    catLoading,
-}: Props) {
+export default function PostListFilterPanel(params: Props) {
     return (
         <div className={s.controls}>
             <input
                 className={s.filterInput}
-                value={q}
-                onChange={(e) => onChangeQ(e.currentTarget.value)}
+                value={params.q}
+                onChange={(e) => params.onChangeQ(e.currentTarget.value)}
                 placeholder="Search by title"
             />
 
             <select
                 className={s.btn}
-                value={orderBy}
+                value={params.orderBy}
                 onChange={(e) =>
-                    onChangeOrderBy(e.currentTarget.value as Props["orderBy"])
+                    params.onChangeOrderBy(e.currentTarget.value as Props["orderBy"])
                 }
                 title="Sort by"
             >
@@ -55,13 +46,13 @@ export default function PostListFilterPanel({
 
             <select
                 className={s.btn}
-                value={categoryId}
-                onChange={(e) => onChangeCategoryId(e.currentTarget.value)}
-                disabled={catLoading}
+                value={params.categoryId}
+                onChange={(e) => params.onChangeCategoryId(e.currentTarget.value)}
+                disabled={params.catLoading}
                 title="Filter by category"
             >
                 <option value="">all categories</option>
-                {categories.map((c) => (
+                {params.categories.map((c) => (
                     <option key={c.id} value={c.id}>
                         {c.title}
                     </option>

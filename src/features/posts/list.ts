@@ -1,6 +1,5 @@
 import api from "@features/api.ts";
-
-import type {PostsList, PostStatus} from "@features/posts/posts.ts";
+import type {PostsList, PostStatus} from "@features/posts/post.ts";
 
 export type ListPostsParams = {
     author_id?:       string;

@@ -7,9 +7,8 @@ import CommentsSection from "@components/comments/CommentsSection.tsx";
 
 import api from"@features/api.ts";
 
-import type { Post } from "@/features/posts/posts";
-
 import s from "./PostPage.module.scss";
+import type {Post} from "@features/posts/post.ts";
 
 export default function PostPage() {
     const navigate = useNavigate();

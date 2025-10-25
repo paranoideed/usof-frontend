@@ -1,18 +1,37 @@
 import api from "@/features/api.ts";
+import {getCurrentUserId} from "@features/auth/sessions.ts";
 
 export type ResetPasswordInput = {
-    new_password: string;
-    new_password_confirm: string;
+    data: {
+        id: string;
+        type: "reset_password";
+        attributes: {
+            new_password: string;
+        }
+    }
 }
 
-export async function resetPassword(input: ResetPasswordInput): Promise<any> {
-    const payload = {
-        new_password: input.new_password,
+export async function resetPassword(params: {password: string}): Promise<any> {
+    const userId = getCurrentUserId()
+    if (!userId) {
+        throw new Error("User is not authenticated");
+    }
+
+    console.log("Resetting password for user ID:", userId);
+
+    const body: ResetPasswordInput = {
+        data: {
+            id: userId,
+            type: "reset_password",
+            attributes: {
+                new_password: params.password,
+            }
+        }
     };
 
     try {
-        const { data } = await api.post('/auth/reset-password', payload);
-        console.log("success: ", data);
+        const { data } = await api.post('/auth/reset-password', body);
+
         return data;
     } catch (error: any) {
         if (error.response) {

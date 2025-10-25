@@ -26,8 +26,8 @@ export default function CategoryFormPage() {
         setLoading(true);
         getCategory(id)
             .then((cat) => {
-                setTitle(cat.title ?? "");
-                setDescription(cat.description ?? "");
+                setTitle(cat.data.attributes.title ?? "");
+                setDescription(cat.data.attributes.description ?? "");
             })
             .catch((e) => setError(e?.message || String(e)))
             .finally(() => setLoading(false));
@@ -43,7 +43,11 @@ export default function CategoryFormPage() {
         if (!title.trim()) return setError("Title is required");
         setLoading(true);
         try {
-            if (editing && id) await updateCategory({ id, title, description });
+            if (editing && id) await updateCategory({
+                categoryId: id,
+                title: title,
+                description: description
+            });
             else await createCategory({ title, description });
             navigate("/categories");
         } catch (e) {

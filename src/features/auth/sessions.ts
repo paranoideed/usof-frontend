@@ -63,8 +63,9 @@ export function getUsername(): string | null {
     }
 }
 
-export function saveAvatar(avatarUrl: string): void {
+export function saveAvatar(avatarUrl?: string | null): void {
     try {
+        if (!avatarUrl) return;
         localStorage.setItem("avatar_url", avatarUrl);
     } catch (e) {
         console.error("Could not save avatar URL to localStorage", e);
@@ -77,6 +78,16 @@ export function getAvatar(): string | null {
     } catch (e) {
         console.error("Could not retrieve avatar URL from localStorage", e);
         return null;
+    }
+}
+
+export function clearSession(): void {
+    try {
+        Cookies.remove("token");
+        localStorage.removeItem("username");
+        localStorage.removeItem("avatar_url");
+    } catch (e) {
+        console.error("Could not clear session data", e);
     }
 }
 

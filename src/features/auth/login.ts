@@ -1,41 +1,60 @@
 import api from "@features/api.ts";
-import type {Profile} from "@features/profiles/types.ts";
 import {saveAvatar, saveUsername} from "@features/auth/sessions.ts";
 
-export type UserToken = {
-    profile: Profile;
-    token: string
+export type LoginResponse = {
+    data: {
+        id: string;
+        type: "login"
+        attributes: {
+            token:      string;
+            username:   string;
+            pseudonym:  string | null;
+            avatar_url: string | null;
+            reputation: number;
+            created_at: Date;
+            updated_at: Date | null;
+        }
+    }
 };
 
 export type LoginInput = {
-    identifier: string;
-    password: string;
+    data: {
+        type: "login",
+        attributes: {
+            email?: string;
+            username?: string;
+            password: string;
+        }
+    }
 };
 
 function isEmail(value: string) {
     return /\S+@\S+\.\S+/.test(value);
 }
 
-export default async function login(input: LoginInput): Promise<UserToken> {
-    const { identifier, password } = input;
+export default async function login(params: {identifier: string, password: string}): Promise<LoginResponse> {
+    let body: LoginInput = {
+        data: {
+            type: "login",
+            attributes: {
+                password: params.password,
+            }
+        }
+    };
 
-    const payload: Record<string, string> = { password };
-    if (isEmail(identifier)) {
-        payload.email = identifier;
+    if (isEmail(params.identifier)) {
+        body.data.attributes.email = params.identifier;
     } else {
-        payload.username = identifier;
+        body.data.attributes.email = params.identifier;
     }
 
     try {
-        const { data } = await api.post('/auth/login', payload);
-        console.log("success: ", data);
+        const responseData: LoginResponse = await api.post('/auth/login', body);
 
-        console.log(data);
+        saveAvatar(responseData.data.attributes.avatar_url);
+        saveUsername(responseData.data.attributes.username);
 
-        saveAvatar(data.avatar_url);
-        saveUsername(data.username);
-
-        return data;
+        return responseData;
     } catch (error: any) {
         if (error.response) {
             console.error("error: ", error.response.data);

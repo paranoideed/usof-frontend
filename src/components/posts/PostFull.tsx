@@ -15,8 +15,8 @@ import { updatePostStatus } from "@features/posts/update.ts";
 import { likePost, unlikePost} from "@features/likes/posts.ts";
 import { getCurrentUserId, getCurrentUserRole } from "@features/auth/sessions.ts";
 
-import {type MyReaction, parseMyReaction } from "@features/likes/types.ts";
-import { type Post } from "@/features/posts/posts";
+import {type MyReaction, parseMyReaction } from "@features/likes/like.ts";
+import { type Post } from "@/features/posts/post";
 
 import s from "@components/posts/PostFull.module.scss";
 import getUserPic from "@features/ui.ts";
@@ -26,31 +26,31 @@ export default function PostFull(props: Post) {
     const navigate = useNavigate();
 
     const [post, setPost] = React.useState(props.data);
-    const [cats, setCats] = React.useState(props.categories ?? []);
-    const [myReaction, setMyReaction] = React.useState<MyReaction>(parseMyReaction(props.user_reaction));
+    const [cats, setCats] = React.useState(props.data.attributes.categories ?? []);
+    const [myReaction, setMyReaction] = React.useState<MyReaction>(parseMyReaction(props.data.attributes.user_reaction));
     const [busy, setBusy] = React.useState(false);
     const [editOpen, setEditOpen] = React.useState(false);
 
     React.useEffect(() => {
         setPost(props.data);
-        setCats(props.categories ?? []);
-        setMyReaction(parseMyReaction(props.user_reaction));
-    }, [props.data, props.categories, props.user_reaction]);
+        setCats(props.data.attributes.categories ?? []);
+        setMyReaction(parseMyReaction(props.data.attributes.user_reaction));
+    }, [props.data, props.data.attributes.categories, props.data.attributes.user_reaction]);
 
     const meId = getCurrentUserId();
     const meRole = getCurrentUserRole();
-    const canDelete = meRole === "admin" || (meId && meId === post.author_id);
-    const canManage = meRole === "admin" || (meId && meId === post.author_id);
-    const canEdit = Boolean(meId && meId === post.author_id);
+    const canDelete = meRole === "admin" || (meId && meId === post.attributes.author_id);
+    const canManage = meRole === "admin" || (meId && meId === post.attributes.author_id);
+    const canEdit = Boolean(meId && meId === post.attributes.author_id);
 
-    const isClosed = post.status === "closed";
+    const isClosed = post.attributes.status === "closed";
     const nextStatus = isClosed ? "active" : "closed";
 
     async function refreshFromServer() {
         const fresh = await getPost(post.id);
         setPost(fresh.data);
-        setCats(fresh.categories ?? []);
-        setMyReaction(parseMyReaction(fresh.user_reaction));
+        setCats(fresh.data.attributes.categories ?? []);
+        setMyReaction(parseMyReaction(fresh.data.attributes.user_reaction));
     }
 
     async function onLike() {
@@ -98,10 +98,13 @@ export default function PostFull(props: Post) {
     async function onToggleStatus() {
         if (!canManage || busy) return;
         setBusy(true);
-        const prev = post.status;
+        const prev = post.attributes.status;
         setPost((p) => ({ ...p, status: nextStatus })); // оптимистичный апдейт
         try {
-            await updatePostStatus(post.id, nextStatus);
+            await updatePostStatus({
+                postId: post.id,
+                status: nextStatus,
+            });
         } catch {
             setPost((p) => ({ ...p, status: prev })); // откат
             alert("Cannot update post status");
@@ -122,19 +125,19 @@ export default function PostFull(props: Post) {
             <div className={s.header}>
                 <div className={s.postInfo}>
                     <div className={s.meta}>
-                        <AvatarImg className={s.avatar} src={getUserPic(post.author_avatar_url)} alt="avatar" />
+                        <AvatarImg className={s.avatar} src={getUserPic(post.attributes.author_avatar_url)} alt="avatar" />
                         <div className={s.username}>
                             <Link
-                                to={`/profiles/u/${post.author_username}`}
+                                to={`/profiles/u/${post.attributes.author_username}`}
                                 onClick={(e) => e.stopPropagation()}
                                 onKeyDown={(e) => e.stopPropagation()}
                             >
-                                @{post.author_username ?? `@${post.author_username}`}
+                                @{post.attributes.author_username ?? `@${post.attributes.author_username}`}
                             </Link>
                         </div>
                     </div>
 
-                    <h1 className={s.title}>{post.title}</h1>
+                    <h1 className={s.title}>{post.attributes.title}</h1>
 
                     {cats?.length ? (
                         <div className={s.categories}>
@@ -156,17 +159,17 @@ export default function PostFull(props: Post) {
                     ) : null}
 
                     <div className={s.date}>
-                        <span>Published: {new Date(post.created_at).toDateString()}</span>
+                        <span>Published: {new Date(post.attributes.created_at).toDateString()}</span>
                     </div>
                 </div>
 
                 <div className={s.headerButtonsContainer}>
-                    <RatingPost count={(post.likes - post.dislikes) || 0} />
+                    <RatingPost count={(post.attributes.likes - post.attributes.dislikes) || 0} />
                 </div>
             </div>
 
             <div className={s.content}>
-                <MarkdownView>{post.content}</MarkdownView>
+                <MarkdownView>{post.attributes.content}</MarkdownView>
             </div>
 
             <div className={s.actions}>
@@ -175,14 +178,14 @@ export default function PostFull(props: Post) {
                         active={myReaction === "like"}
                         onClick={onLike}
                         disabled={busy}
-                        count={post.likes}
+                        count={post.attributes.likes}
                         aria-pressed={myReaction === "like"}
                     />
                     <DislikeButton
                         active={myReaction === "dislike"}
                         onClick={onDislike}
                         disabled={busy}
-                        count={post.dislikes}
+                        count={post.attributes.dislikes}
                         aria-pressed={myReaction === "dislike"}
                     />
                 </div>
@@ -217,8 +220,8 @@ export default function PostFull(props: Post) {
                         setEditOpen(false);
                     }}
                     postId={post.id}
-                    initialTitle={post.title}
-                    initialContent={post.content}
+                    initialTitle={post.attributes.title}
+                    initialContent={post.attributes.content}
                     initialCategories={cats ?? []}
                 />
             )}

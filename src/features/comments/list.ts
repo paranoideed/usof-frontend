@@ -1,15 +1,8 @@
 import api from "@features/api.ts";
 
-import type {Comment} from "@features/comments/types.ts";
+import type { CommentList } from "@features/comments/comment";
 
-export type ListCommentsResponse = {
-    data: Comment[];
-    total?: number | null;
-    limit?: number | null;
-    offset?: number | null;
-};
-
-export async function fetchComments(postId: string, limit = 10, offset = 0): Promise<ListCommentsResponse> {
+export async function fetchComments(postId: string, limit = 10, offset = 0): Promise<CommentList> {
     const res = await api.get(`/comments`, {
         params: { post_id: postId, limit, offset },
     });
@@ -21,7 +14,7 @@ export async function fetchCommentsByParent(
     parentId: string | null,
     limit = 10,
     offset = 0
-): Promise<ListCommentsResponse> {
+): Promise<CommentList> {
     const res = await api.get(`/comments`, {
         params: { post_id: postId, parent_id: parentId, limit, offset },
     });

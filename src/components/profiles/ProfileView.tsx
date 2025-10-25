@@ -3,44 +3,35 @@ import * as React from "react";
 import s from "./ProfileView.module.scss";
 import AvatarImg from "@components/ui/AvatarImg.tsx";
 import getUserPic from "@features/ui.ts";
+import type {Profile} from "@features/profiles/types.ts";
 
 type Props = {
-    username:    string;
-    pseudonym?:  string | null;
-    avatar_url?: string | null;
-    reputation:  number;
-    created_at:  string | Date;
-    actions?:    React.ReactNode;
+    profile:  Profile;
+    actions?: React.ReactNode;
 };
 
-export default function ProfileView({
-    username,
-    pseudonym,
-    avatar_url,
-    reputation,
-    created_at,
-    actions,
-}: Props) {
+export default function ProfileView(params: Props) {
+    console.log("Rendering ProfileView for", params.profile);
     return (
         <div className={s.container}>
             <div className={s.profile}>
                 <AvatarImg
                     className={s.avatar}
-                    src={getUserPic(avatar_url)}
+                    src={getUserPic(params.profile.data.attributes.avatar_url)}
                     alt="avatar"
                 />
                 <div className={s.info}>
-                    <div className={s.username}>@{username}</div>
-                    {pseudonym ? <div className={s.pseudonym}>{pseudonym}</div> : null}
-                    <div><b>Reputation:</b> {reputation}</div>
-                    {created_at ? (
+                    <div className={s.username}>@{params.profile.data.attributes.username}</div>
+                    {params.profile.data.attributes.pseudonym ? <div className={s.pseudonym}>{params.profile.data.attributes.pseudonym}</div> : null}
+                    <div><b>Reputation:</b> {params.profile.data.attributes.reputation}</div>
+                    {params.profile.data.attributes.created_at ? (
                         <div><b>Part since:</b>{
-                            new Date(created_at).toDateString().slice(3)
+                            new Date(params.profile.data.attributes.created_at).toDateString().slice(3)
                         }</div>
                     ) : null}
                 </div>
             </div>
-            {actions ? <div className={s.actions}>{actions}</div> : null}
+            {params.actions ? <div className={s.actions}>{params.actions}</div> : null}
         </div>
     );
 }

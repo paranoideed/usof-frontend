@@ -44,6 +44,8 @@ export default function useMeProfile() : {
         return () => { alive = false; };
     }, []);
 
+    console.log("useMeProfile:", { data, loading, error, status });
+
     return { data, loading, error, status, setData } as {
         data: Profile | null;
         loading: boolean;

@@ -44,7 +44,9 @@ export default function ResetPasswordForm({ onSuccess, onCancel }: Props) {
 
         try {
             setLoading(true);
-            await resetPassword({ new_password: pwd, new_password_confirm: confirm });
+            await resetPassword({
+                password: pwd,
+            });
             setOk("Password updated");
             setPwd("");
             setConfirm("");

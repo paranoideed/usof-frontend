@@ -26,7 +26,7 @@ export default function useProfilesSearch(initialQ = "", initialLimit = 10) {
         let alive = true;
 
         if (!dq.trim()) {
-            setData({ items: [], total: 0, limit, offset: 0 });
+            setData({ data: [], meta: { total: 0, limit, offset: 0 } });
             setErr(null);
             return;
         }
@@ -52,7 +52,7 @@ export default function useProfilesSearch(initialQ = "", initialLimit = 10) {
 
     const hasMore = useMemo(() => {
         if (!data) return false;
-        return data.offset + data.limit < data.total;
+        return data.meta.offset + data.meta.limit < data.meta.total;
     }, [data]);
 
     useEffect(() => {

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import RatingPost from "@components/ui/RatingPost";
 
-import type { Post } from "@/features/posts/posts";
+import type { Post } from "@/features/posts/post";
 
 import s from "./PostSmall.module.scss";
 import getUserPic from "@features/ui.ts";
@@ -15,10 +15,10 @@ type Props = {
 
 export default function PostSmall({ post }: Props) {
     const navigate = useNavigate();
-    const username = post.data.author_username;
+    const username = post.data.attributes.author_username;
 
     const rating =
-        (post.data.likes ?? 0) - (post.data.dislikes ?? 0);
+        (post.data.attributes.likes ?? 0) - (post.data.attributes.dislikes ?? 0);
 
     const goToPost = () => navigate(`/posts/${post.data.id}`);
     const onKeyDownRoot = (e: React.KeyboardEvent) => {
@@ -28,7 +28,7 @@ export default function PostSmall({ post }: Props) {
         }
     };
 
-    console.log("avatar url:", post.data.author_avatar_url);
+    console.log("avatar url:", post.data.attributes.author_avatar_url);
 
     return (
     <article className={s.container}>
@@ -41,7 +41,7 @@ export default function PostSmall({ post }: Props) {
         >
             <div className={s.header}>
                 <div>
-                    <AvatarImg className={s.avatar} src={getUserPic(post.data.author_avatar_url)} alt="avatar" />
+                    <AvatarImg className={s.avatar} src={getUserPic(post.data.attributes.author_avatar_url)} alt="avatar" />
                 </div>
                 <div className={s.meta}>
                     <div className={s.username}>
@@ -54,18 +54,18 @@ export default function PostSmall({ post }: Props) {
                         </Link>
                     </div>
                     <div className={s.date}>
-                        {new Date(post.data.created_at).toDateString().slice(3)}
+                        {new Date(post.data.attributes.created_at).toDateString().slice(3)}
                     </div>
                 </div>
             </div>
 
-            <div className={s.title}>{post.data.title}</div>
+            <div className={s.title}>{post.data.attributes.title}</div>
 
-            {post.data.content && (
+            {post.data.attributes.content && (
                 <div className={s.content}>
-                    {post.data.content.length > 220
-                        ? post.data.content.slice(0, 220) + "…"
-                        : post.data.content}
+                    {post.data.attributes.content.length > 220
+                        ? post.data.attributes.content.slice(0, 220) + "…"
+                        : post.data.attributes.content}
                 </div>
             )}
         </div>

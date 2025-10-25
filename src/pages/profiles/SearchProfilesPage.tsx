@@ -9,17 +9,15 @@ import useProfilesSearch from "./hooks/useProfilesSearch";
 import s from "./SearchProfilesPage.module.scss";
 
 export default function SearchProfilesPage() {
-    const { q, setQ, data, loading, err, hasMore, limit, offset, setOffset } = useProfilesSearch("", 10);
+    const { q, setQ, data, loading, err, hasMore, limit, offset, setOffset } =
+        useProfilesSearch("", 10);
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setQ(e.currentTarget.value);
     };
+    const loadMore = () => setOffset(offset + limit);
 
-    const loadMore = () => {
-        setOffset(offset + limit);
-    };
-
-    if (err !== null) console.error(err);
+    const items = data?.data ?? [];
 
     return (
         <div className={s.rootForSearch}>
@@ -39,30 +37,25 @@ export default function SearchProfilesPage() {
 
                 {loading && <div>Searching...</div>}
 
-                <>
-                    {data && data.items.length === 0 ? (
-                        <div className={s.nothingFound}>Nothing found</div>
-                    ) : (
-                        <ul className={s.profilesList}>
-                            {(data?.items ?? []).map(u => (
-                                <li key={u.id} className={s.profilesListItem}>
-                                    <ProfileMini
-                                        id={u.id}
-                                        username={u.username}
-                                        pseudonym={u.pseudonym ?? undefined}
-                                        avatar_url={u.avatar_url ?? undefined}
-                                    />
-                                </li>
-                            ))}
-                        </ul>
-                    )}
+                {!loading && items.length === 0 && (
+                    <div className={s.nothingFound}>Nothing found</div>
+                )}
 
-                    {hasMore && (
-                        <button className={s.more} onClick={loadMore}>
-                            Load more
-                        </button>
-                    )}
-                </>
+                {items.length > 0 && (
+                    <ul className={s.profilesList}>
+                        {items.map((u) => (
+                            <li key={u.id} className={s.profilesListItem}>
+                                <ProfileMini profile={{ data: u }} />
+                            </li>
+                        ))}
+                    </ul>
+                )}
+
+                {hasMore && (
+                    <button className={s.more} onClick={loadMore} disabled={loading}>
+                        {loading ? "Loading..." : "Load more"}
+                    </button>
+                )}
             </div>
         </div>
     );
