@@ -75,3 +75,22 @@
   opacity: 0.7;
   font-size: 12px;
 }
+
+.replyDockHeader {
+  margin: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.replyDockTitle {
+  font-weight: 600;
+}
+
+.replyDockClose {
+  background: $brand;
+  font-size: 14px;
+  cursor: pointer;
+  border: $brand-hover 1px solid;
+  border-radius: 6px;
+}

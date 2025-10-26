@@ -45,3 +45,24 @@
 .label {
   opacity: .9;
 }
+
+@media (max-width: 600px) {
+  .like {
+    padding: 6px 12px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 400px) {
+  .like {
+    padding: 5px 10px;
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 300px) {
+  .like {
+    padding: 4px 8px;
+    font-size: 6px;
+  }
+}

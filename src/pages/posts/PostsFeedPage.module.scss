@@ -22,3 +22,15 @@
   border-radius: 10px;
   background: #ff6b6b0f;
 }
+
+@media (max-width: 768px) {
+  .wrap {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .root {
+    width: 100%;
+    grid-template-rows: auto 1fr auto;
+  }
+}

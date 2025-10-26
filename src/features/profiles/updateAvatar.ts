@@ -8,7 +8,7 @@ export default async function updateAvatar(file: File): Promise<Profile> {
 
     try {
         const { data } = await api.post("/profiles/me/avatar", form);
-        saveAvatar(data.avatar_url);
+        saveAvatar(data.data.attributes.avatar_url);
 
         return data;
     } catch (err: any) {

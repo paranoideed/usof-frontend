@@ -47,7 +47,7 @@ export default function NavBar() {
                                     className={s.avatar}
                                     src={getUserPic(avatarUrl)}
                                 />
-                                @{username}
+                                <div className={s.username}>@{username}</div>
                             </NavLink>
                         </li>
                     ) : (

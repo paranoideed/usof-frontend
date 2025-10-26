@@ -55,12 +55,6 @@ export default function LoginPage() {
             setLoading(true);
             const data = await login({ identifier, password });
 
-            Cookies.set("token", data.data.attributes.token, {
-                expires: 7,
-                sameSite: "lax",
-                secure: window.location.protocol === "https:",
-            });
-
             saveUsername(data.data.attributes.username);
 
             if (data.data.attributes.avatar_url) {

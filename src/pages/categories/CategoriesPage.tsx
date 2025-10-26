@@ -24,7 +24,7 @@ export default function CategoriesPage() {
         loadMore,
         removeLocally,
         setVisible,
-    } = useCategoriesFeed(20);
+    } = useCategoriesFeed(15);
 
     async function handleDelete(cat: Category) {
         const name = cat.data.attributes?.title ?? "category";

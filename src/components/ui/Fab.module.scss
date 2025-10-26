@@ -27,3 +27,31 @@
 .fab:active {
   transform: translateY(1px);
 }
+
+@media (max-width: 1000px) {
+  .fab {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 600px) {
+  .fab {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 400px) {
+  .fab {
+    padding: 8px 10px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 300px) {
+  .fab {
+    padding: 6px 8px;
+    font-size: 8px;
+  }
+}

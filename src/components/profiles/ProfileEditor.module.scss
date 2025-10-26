@@ -16,7 +16,8 @@
   }
 }
 
-.info > div {
+.info {
+  align-items: start;
   margin: 6px 0;
 }
 
@@ -34,4 +35,5 @@
   border-radius: calc(var(--radius) - 4px);
   object-fit: cover;
   background: #f3f3f3;
+  margin-bottom: 16px;
 }

@@ -31,7 +31,10 @@ export function parseJwtPayload<T = any>(token: string | null): T | null {
 
 export function getCurrentUserRole(): UserRole | null {
     const token = getAccessToken();
+    if (!token) return null;
+
     const payload = parseJwtPayload<{ role?: UserRole; Role?: UserRole }>(token);
+
     return payload?.role ?? payload?.Role ?? null;
 }
 

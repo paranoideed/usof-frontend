@@ -20,3 +20,31 @@
     cursor: default;
   }
 }
+
+@media (max-width: 1000px) {
+  .button {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 600px) {
+  .button {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 400px) {
+  .button {
+    padding: 8px 10px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 300px) {
+  .button {
+    padding: 6px 8px;
+    font-size: 8px;
+  }
+}

@@ -13,3 +13,14 @@
   max-width: 800px;
   width: 100%;
 }
+
+@media (max-width: 600px) {
+  .root {
+    padding: 16px;
+  }
+
+  .container {
+    padding: 0;
+    max-width: 95%;
+  }
+}

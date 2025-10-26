@@ -31,7 +31,7 @@ export const ReplyContext = React.createContext<ReplyCtx>({
     close: () => {},
 });
 
-const ContentSchema = z.string().min(1, "Пустой комментарий").max(1000, "Слишком длинно");
+const ContentSchema = z.string().min(1, "Empty Comment").max(10000, "To large");
 const PAGE_SIZE = 10;
 
 type Props = { postId: string };
@@ -212,11 +212,11 @@ export default function CommentsSection({ postId }: Props) {
                             value={replyValue}
                             onChange={(e) => setReplyValue(e.currentTarget.value)}
                             placeholder="Write your reply…"
-                            maxLength={1000}
+                            maxLength={10000}
                             rows={3}
                         />
                         <div className={s.formBar}>
-                            <span className={s.counter}>{replyValue.length}/1000</span>
+                            <span className={s.counter}>{replyValue.length}/10000</span>
                             <div>
                                 <Button className={s.submit} disabled={posting || replyValue.trim().length === 0}>
                                     {posting ? "Sending…" : "Send"}
@@ -285,11 +285,11 @@ function RootComposer({
                 value={value}
                 onChange={(e) => setValue(e.currentTarget.value)}
                 placeholder="Write comment…"
-                maxLength={1000}
+                maxLength={10000}
                 rows={4}
             />
             <div className={s.formBar}>
-                <span className={s.counter}>{value.length}/1000</span>
+                <span className={s.counter}>{value.length}/10000</span>
                 <div>
                     <Button className={s.submit} disabled={posting || value.trim().length === 0}>
                         {posting ? "Sending…" : "Send"}

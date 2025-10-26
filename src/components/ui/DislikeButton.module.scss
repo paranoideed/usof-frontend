@@ -3,8 +3,8 @@
 .dislike {
   min-width: 44px;
   height: 36px;
-  padding: 0 12px;
   border-radius: 999px;
+  padding: 8px 16px;
   border: none;
   background: $dislike;
   color: #fff;
@@ -44,4 +44,25 @@
 
 .label {
   opacity: .9;
+}
+
+@media (max-width: 600px) {
+  .dislike {
+    padding: 6px 12px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 400px) {
+  .dislike {
+    padding: 5px 10px;
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 300px) {
+  .dislike {
+    padding: 4px 8px;
+    font-size: 6px;
+  }
 }

@@ -1,9 +1,11 @@
 import * as React from "react";
 
-import s from "./ProfileView.module.scss";
 import AvatarImg from "@components/ui/AvatarImg.tsx";
 import getUserPic from "@features/ui.ts";
+
 import type {Profile} from "@features/profiles/profile.ts";
+
+import s from "./ProfileView.module.scss";
 
 type Props = {
     profile:  Profile;

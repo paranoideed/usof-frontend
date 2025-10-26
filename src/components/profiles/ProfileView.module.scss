@@ -1,19 +1,17 @@
 @use "../../styles/variables" as *;
 @use "sass:color";
 
+.container {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  width: 100%;
+}
+
 .profile {
   display: grid;
   grid-template-columns: var(--avatar) 1fr;
   gap: var(--space);
   align-items: center;
-}
-
-@media (max-width: 600px) {
-  .profile {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    text-align: center;
-  }
 }
 
 .title {
@@ -27,14 +25,6 @@
   grid-template-columns: var(--avatar) 1fr;
   gap: var(--space);
   align-items: center;
-}
-
-@media (max-width: 600px) {
-  .profile {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    text-align: center;
-  }
 }
 
 .username {
@@ -69,11 +59,42 @@
   gap: var(--space);
 }
 
-@container (min-width: 640px) {
-  .info > div {
-    margin: 8px 0;
-  }
+@media (max-width: 600px) {
   .actions {
-    margin-top: calc(var(--space) * 1.5);
+      flex-direction: column;
+      align-items: center;
+      display: flex;
+  }
+
+  .avatar {
+      width: calc(var(--avatar) * 0.8);
+      height: calc(var(--avatar) * 0.8);
+  }
+
+  .info {
+      text-align: start;
+  }
+
+  .profile {
+    width: 80%;
+  }
+
+  .profile {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+}
+
+@media (max-width: 400px) {
+  .container {
+      width: 90%;
+  }
+}
+
+@media (max-width: 300px) {
+  .avatar {
+      width: calc(var(--avatar) * 0.7);
+      height: calc(var(--avatar) * 0.7);
   }
 }

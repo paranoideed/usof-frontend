@@ -9,8 +9,8 @@
 }
 
 .avatar {
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: #666;
   flex-shrink: 0;
@@ -26,7 +26,7 @@
 
 .username {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 30px;
   color: #fff;
 }
 
@@ -192,5 +192,29 @@
     color: #8ab4ff;
     text-decoration: none;
     &:hover { text-decoration: underline; }
+  }
+}
+
+@media (max-width: 600px) {
+  .avatar {
+    width: 20px;
+    height: 20px;
+  }
+
+  .username {
+    font-size: 1.2rem;
+  }
+
+  .postCard {
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: center;
   }
 }

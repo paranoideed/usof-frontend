@@ -39,18 +39,33 @@ export async function register(params: {email: string, username: string, passwor
 }
 
 export type RegisterByAdminInput = {
-    username: string;
-    email: string;
-    password: string;
-    role: 'user' | 'admin';
+    data: {
+        type: "register";
+        attributes: {
+            username: string;
+            email: string;
+            password: string;
+            role: 'user' | 'admin';
+        };
+    }
 };
 
-export async function registerByAdmin(input: RegisterByAdminInput): Promise<any> {
-    const payload = {
-        email: input.email,
-        username: input.username,
-        password: input.password,
-        role: input.role,
+export async function registerByAdmin(params: {
+    email: string,
+    username: string,
+    password: string,
+    role: 'user' | 'admin',
+}): Promise<any> {
+    const payload: RegisterByAdminInput = {
+        data: {
+            type: "register",
+            attributes: {
+                email: params.email,
+                username: params.username,
+                password: params.password,
+                role: params.role,
+            }
+        }
     };
 
     try {

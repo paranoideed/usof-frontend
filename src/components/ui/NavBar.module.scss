@@ -26,7 +26,7 @@
   margin: 0 auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 2vw;
   padding: 0 2vw;
 }
@@ -101,4 +101,51 @@
   margin-right: 0.5rem;
   border-radius: 50%;
   object-fit: cover;
+}
+
+@media (max-width: 768px) {
+  .inner {
+    width: 90%;
+    padding: 0 1rem;
+    gap: 1rem;
+  }
+
+  .menu {
+    gap: 0.5rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .link,
+  .active {
+    font-size: calc(var(--nav-font) * 0.7);
+    height: 20px;
+  }
+
+  .brand {
+    display: none;
+  }
+
+  .username {
+
+  }
+}
+
+@media (max-width: 480px) {
+  .inner {
+    width: 90%;
+    padding: 0;
+    gap: 1rem;
+  }
+
+  .link,
+  .active {
+    padding: 0 0.3rem;
+    font-size: calc(var(--nav-font) * 0.8);
+    height: 36px;
+  }
+
+  .username {
+    display: none;
+  }
 }

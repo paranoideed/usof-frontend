@@ -1,5 +1,6 @@
 import api from "@features/api.ts";
 import {saveAvatar, saveUsername} from "@features/auth/sessions.ts";
+import Cookies from "js-cookie";
 
 export type LoginResponse = {
     data: {
@@ -11,8 +12,8 @@ export type LoginResponse = {
             pseudonym:  string | null;
             avatar_url: string | null;
             reputation: number;
-            created_at: Date;
-            updated_at: Date | null;
+            created_at: string;
+            updated_at: string | null;
         }
     }
 };
@@ -32,35 +33,45 @@ function isEmail(value: string) {
     return /\S+@\S+\.\S+/.test(value);
 }
 
-export default async function login(params: {identifier: string, password: string}): Promise<LoginResponse> {
-    let body: LoginInput = {
+export default async function login(params: { identifier: string; password: string }): Promise<LoginResponse> {
+    const body: LoginInput = {
         data: {
             type: "login",
-            attributes: {
-                password: params.password,
-            }
-        }
+            attributes: { password: params.password },
+        },
     };
 
     if (isEmail(params.identifier)) {
         body.data.attributes.email = params.identifier;
     } else {
-        body.data.attributes.email = params.identifier;
+        body.data.attributes.username = params.identifier;
     }
 
     try {
-        const responseData: LoginResponse = await api.post('/auth/login', body);
+        const res = await api.post<LoginResponse>("/auth/login", body);
 
-        saveAvatar(responseData.data.attributes.avatar_url);
-        saveUsername(responseData.data.attributes.username);
+        const payload: LoginResponse = res.data;
 
-        return responseData;
+        const attrs = payload.data.attributes;
+
+        console.log("Login payload:", attrs);
+
+        saveAvatar(attrs.avatar_url ?? null);
+        saveUsername(attrs.username);
+
+        Cookies.set("token", attrs.token, {
+            expires: 7,
+            sameSite: "lax",
+            secure: window.location.protocol === "https:",
+        });
+
+        return payload;
     } catch (error: any) {
-        if (error.response) {
+        if (error?.response) {
             console.error("error: ", error.response.data);
             console.error("status: ", error.response.status);
         } else {
-            console.error("Internal network error or axios error:", error.message);
+            console.error("Internal network error or axios error:", error?.message);
         }
         throw error;
     }

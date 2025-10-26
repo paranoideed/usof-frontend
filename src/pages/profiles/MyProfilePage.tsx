@@ -18,6 +18,7 @@ import ResetPasswordForm from "@pages/profiles/ResetPasswordForm.tsx";
 
 import s from "./MyProfilePage.module.scss";
 import getUserPic from "@features/ui.ts";
+import {getCurrentUserRole} from "@features/auth/sessions.ts";
 
 export default function MyProfilePage() {
     const { data, loading, error, status, setData, reload } = useMeProfile();
@@ -29,6 +30,8 @@ export default function MyProfilePage() {
     const [saving, setSaving] = useState(false);
     const [ok, setOk] = useState<string | null>(null);
     const [createOpen, setCreateOpen] = useState(false);
+
+    const meRole = getCurrentUserRole();
 
     const navigate = useNavigate();
 
@@ -127,7 +130,9 @@ export default function MyProfilePage() {
                     <>
                         <FormError>{error}</FormError>
                         <div className={s.actions}>
-                            {status === 401 && <Button onClick={() => navigate("/login")}>Back to Login</Button>}
+                            {status === 401 && <Button onClick={() => navigate("/login")}>
+                                Back to Login
+                            </Button>}
                         </div>
                     </>
                 )}
@@ -162,7 +167,7 @@ export default function MyProfilePage() {
                         onChangePseudonym={setPseudonym}
                         onCancel={cancelEdit}
                         onSubmit={onSave}
-                        onAvatarUpdated={onAvatarUpdated} // <-- новый проп
+                        onAvatarUpdated={onAvatarUpdated}
                     />
                 )}
             </div>
@@ -173,7 +178,7 @@ export default function MyProfilePage() {
                 </section>
             )}
 
-            {data && (data as any).role === "admin" && createOpen && (
+            {meRole === "admin" && (
                 <section className={s.section}>
                     <AdminCreateUserForm onSuccess={() => {}} onCancel={() => setCreateOpen(false)} />
                 </section>

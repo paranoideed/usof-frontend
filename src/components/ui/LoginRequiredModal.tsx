@@ -13,24 +13,19 @@ export default function LoginRequiredModal(props: {
     loginPath?: string;
 }) {
     const { open, onClose } = props;
-    const title = props.title ?? "Требуется вход";
-    const message = props.message ?? "Чтобы продолжить, войдите в аккаунт.";
+    const title = props.title ?? "Need to Login";
+    const message = props.message ?? "You must be logged in to perform this action. Please log in to continue.";
     const loginPath = props.loginPath ?? "/login";
-
 
     const navigate = useNavigate();
     const location = useLocation();
 
-
     const redirectTo = React.useMemo(() => {
         if (props.redirectTo) return props.redirectTo;
-// Вернём пользователя на текущую страницу после логина
         const full = location.pathname + (location.search || "") + (location.hash || "");
         return full || "/";
     }, [location, props.redirectTo]);
 
-
-// Блокируем скролл, пока открыто
     React.useEffect(() => {
         if (!open) return;
         const { overflow } = document.body.style;
@@ -40,8 +35,6 @@ export default function LoginRequiredModal(props: {
         };
     }, [open]);
 
-
-// Закрытие по Escape
     React.useEffect(() => {
         if (!open) return;
         const onKey = (e: KeyboardEvent) => {
@@ -51,22 +44,17 @@ export default function LoginRequiredModal(props: {
         return () => window.removeEventListener("keydown", onKey);
     }, [open, onClose]);
 
-
     const onBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (e.target === e.currentTarget) onClose();
     };
-
 
     const gotoLogin = () => {
         const search = createSearchParams({ redirectTo }).toString();
         navigate({ pathname: loginPath, search: search ? `?${search}` : "" });
     };
 
-
     if (!open) return null;
 
-
-    // @ts-ignore
     const modal = (
         <div className={s.backdrop} onMouseDown={onBackdropClick}>
             <div className={s.modal} role="dialog" aria-modal="true" aria-labelledby="login-modal-title">

@@ -51,3 +51,10 @@
     box-shadow: 0 0 0 2px $brand-hover
   }
 }
+
+@media (max-width: 600px) {
+  .rootForSearch {
+    padding: calc(var(--nav-h) + 16px) 16px 16px 16px;
+  }
+
+}

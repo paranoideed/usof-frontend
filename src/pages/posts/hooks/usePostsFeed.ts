@@ -25,7 +25,6 @@ export default function usePostsFeed(opts: UsePostsFeedOpts = {}) {
             const params: ListPostsParams = { ...baseFilters, limit: pageSize, offset };
 
             const res = await listPosts(params);
-            // res по JSON:API: { data: ResourceObject[], meta: { total, limit, offset } }
             const rows = (res as any)?.data ?? [];
             const data: Post[] = rows.map((d: any) => ({ data: d })); // <-- НОРМАЛИЗАЦИЯ!
 
@@ -55,7 +54,6 @@ export default function usePostsFeed(opts: UsePostsFeedOpts = {}) {
         if (!loading && hasMore) void load(false);
     }, [load, loading, hasMore]);
 
-    // Обновлять при изменении фильтров
     React.useEffect(() => {
         void load(true);
     }, [JSON.stringify(baseFilters)]);

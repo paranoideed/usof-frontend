@@ -169,7 +169,11 @@ export default function PostFull(props: Post) {
                         </div>
                     </div>
 
-                    <h1 className={s.title}>{post.attributes.title}</h1>
+                    <h1 className={s.title}>{
+                        post.attributes.status === "closed" ?
+                            `${post.attributes.title} [Closed]` :
+                            post.attributes.title
+                    }</h1>
 
                     {cats?.length ? (
                         <div className={s.categories}>

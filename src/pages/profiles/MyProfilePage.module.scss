@@ -4,6 +4,7 @@
 .actions {
   display: flex;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .section {
@@ -30,10 +31,13 @@
 }
 
 @media (max-width: 768px) {
+  .root{
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
   .card,
   .section {
-    margin-left: 12px;
-    margin-right: 12px;
     padding: 16px;
   }
 

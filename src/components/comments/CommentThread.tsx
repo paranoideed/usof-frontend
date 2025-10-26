@@ -13,6 +13,7 @@ import { ReplyContext } from "@/components/comments/CommentsSection";
 
 import s from "./CommentThread.module.scss";
 import LoginRequiredModal from "@components/ui/LoginRequiredModal.tsx";
+import MarkdownView from "@components/ui/MarkdownView.tsx";
 
 const PAGE_SIZE = 10;
 const CAP_DEPTH = 4;          // глубина, после которой визуально не сдвигаем
@@ -147,7 +148,9 @@ export default function CommentThread({ postId, comment, depth = 0, replies, onD
                 <time className={s.time}>{new Date(comment.data.attributes.created_at).toLocaleString()}</time>
             </div>
 
-            <p className={s.content}>{comment.data.attributes.content}</p>
+            <p className={s.content}>
+                <MarkdownView>{comment.data.attributes.content}</MarkdownView>
+            </p>
 
             <div className={s.btnFooter}>
                 <div>

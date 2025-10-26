@@ -85,3 +85,14 @@
   opacity: 0.9;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: 12px 14px;
+  }
+
+  .container {
+    width: 90%;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
