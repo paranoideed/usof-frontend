@@ -1,6 +1,6 @@
 import api from "@features/api.ts";
 
-import type {Comment} from "@features/comments/create.ts";
+import type {Comment} from "@features/comments/comment.ts";
 import type {LikeType} from "@features/likes/like.ts";
 
 export type CommentLikeInput = {

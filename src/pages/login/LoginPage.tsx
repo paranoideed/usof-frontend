@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Cookies from "js-cookie";
 
 import Button from "@/components/ui/Button";
 import TextField from "@/components/ui/TextField";
